@@ -1,0 +1,85 @@
+<div class="w-100 py-3 poke-sheet-header d-inline-flex justify-content-between">
+    <span class="poke-sheet-header-title">Block Editor</span>
+    <mat-icon (click)="close()" class="poke-sheet-header-icon rounded bg-gray cursor-pointer" matRipple>close</mat-icon>
+</div>
+
+<div class="row">
+    <div class="col-sm-4">
+        <h3 class="my-3"><b>Blockset</b></h3>
+        <div class="map-sidenav blockset-display overflow-auto poke-tool-sub-sidenav-2x border-left" *ngIf="currentMap && currentMap.blockset">
+            <div class="position-relative" [style.zIndex]="50">
+                <img 
+                *ngIf="blockset"
+                [src]="blockset.toDataURL()" 
+                [style.width]="(blockset.width * zoom) + 'px'"
+                [style.height]="(blockset.height * zoom) + 'px'"
+                class="d-block position-absolute" 
+                [style.zIndex]="15" />
+            </div>
+            <div class="position-relative">
+                <div 
+                    *ngFor="let block of [].constructor(861); let i = index" 
+                    (click)="selectBlock(i)"
+                    [style.left]="(i * 16 * zoom) % (16 * zoom * 8) + 'px'" 
+                    [style.top]="floorValue((i * 16 * zoom) / (16 * zoom * 8)) * 16 * zoom + 'px'" 
+                    [style.width]="(16 * zoom) + 'px'" 
+                    [style.height]="(16 * zoom) + 'px'"
+                    [style.zIndex]="250"
+                    class="position-absolute block-hover"
+                    [ngClass]="{ 'block-selected': (i == selectedBlockId) }"
+                    matRipple >
+                    
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="col-sm-4">
+        <h3 class="my-3"><b>Tilesets</b></h3>
+
+        <mat-form-field class="w-100" appearance="outline">
+            <mat-label>Tileset Palette</mat-label>
+            <mat-select [(ngModel)]="currentTilesetPalette">
+                <mat-option *ngFor="let palette of [].constructor(16); let i = index" [value]="i">Palette {{ i }}</mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-sm-4">
+        <h3 class="mt-3 mb-0"><b>Selected Block</b></h3>
+        <p class="mb-3 text-gray"><b>BLOCK ID:</b> {{ selectedBlockId }} | 0x{{ selectedBlockId.toString(16).toUpperCase() }}</p>
+
+        <mat-form-field class="w-100 mt-4 mb-2" appearance="outline">
+            <mat-label>Behavior</mat-label>
+            <mat-select [(ngModel)]="selectedBlock.behaviorId">
+                <mat-option *ngFor="let behavior of behaviorNames; let i = index" [value]="i">{{ behavior }}</mat-option>
+            </mat-select>
+        </mat-form-field> 
+
+        <mat-form-field class="w-100 mb-2" appearance="outline">
+            <mat-label>Background Type</mat-label>
+            <mat-select [(ngModel)]="selectedBlock.backgroundId">
+                <mat-option *ngFor="let background of backgroundNames; let i = index" [value]="i">{{ background }}</mat-option>
+            </mat-select>
+        </mat-form-field> 
+
+        <div class="w-100" *ngIf="selectedBlock.behaviorId == 105 && currentAnimation">
+            <p><b>Door Animation</b></p>
+
+            <div class="d-flex flex-column justify-content-center align-items-center mb-4">
+                <div class="d-flex flex-column justify-content-center align-items-center p-2">
+                    <img 
+                        *ngIf="currentAnimation.currentFrame"
+                        [src]="currentAnimation.currentFrame" 
+                        width="32px" 
+                        class="border d-block"
+                        [style.minWidth]="'32px'" 
+                        [style.maxWidth]="'32px'" 
+                        [style.zIndex]="20" />
+    
+                    <button mat-button *ngIf="currentAnimation.isAnimating" class="mt-2 bg-gray" (click)="currentAnimation.stop()">Stop</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>

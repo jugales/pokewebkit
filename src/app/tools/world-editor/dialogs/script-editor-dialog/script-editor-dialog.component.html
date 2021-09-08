@@ -1,0 +1,48 @@
+<div class="w-100 py-3 poke-sheet-header d-inline-flex justify-content-between">
+    <span class="poke-sheet-header-title">Script Editor</span>
+    <mat-icon (click)="close()" class="poke-sheet-header-icon rounded bg-gray cursor-pointer" matRipple>close</mat-icon>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <p class="mt-3"><b>Start Address: </b> <span class="hex-value">0x{{ script.address.toString(16).toUpperCase() }}</span></p>
+        
+        <div class="w-100" *ngIf="!isLoading && currentLineCommand">
+            <div class="p-2 bg-gray">
+                <p class="border-bottom pb-1 mb-3"><em>Line #{{ currentLine + 1 }}</em></p>
+                <p class="mb-1"><b>Command Label:</b><span class="hex-value"> {{ currentLineCommand.label }}</span></p>
+                <p class="mb-1">
+                    <b>Command ID:</b>
+                    <span class="hex-value" *ngIf="currentLineCommand.label !== 'unknown'"> {{ currentLineCommand.index >=0 ? ('0x' + currentLineCommand.index.toString(16).toUpperCase()) : 'Special Combination' }}</span>
+                    <span class="hex-value" *ngIf="currentLineCommand.label == 'unknown'"> none</span>
+                </p>
+                <p class="mb-1" *ngIf="currentLineCommand.index >=0">
+                    <b>Parameters: </b>
+                    <span>[</span>
+                    <span class="hex-value" *ngFor="let paramLength of currentLineCommand.paramLengths; let i = index">
+                        <span *ngIf="paramLength == 1">byte{{ (i !== currentLineCommand.paramLengths.length - 1) ? ', ' : '' }}</span>
+                        <span *ngIf="paramLength == 2">short{{ (i !== currentLineCommand.paramLengths.length - 1) ? ', ' : '' }}</span>
+                        <span *ngIf="paramLength == 4">pointer{{ (i !== currentLineCommand.paramLengths.length - 1) ? ', ' : '' }}</span>
+                    </span>
+                    <span *ngIf="currentLineCommand.paramLengths.length == 0" class="hex-value">None</span>
+                    <span>]</span>
+                </p>
+                <p class="mb-0"><b>Description:</b> {{ currentLineCommand.description }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="d-block" *ngIf="!isLoading">
+            <ngx-codemirror 
+                #scriptEditor
+                [(ngModel)]="scriptText" 
+                [options]="{ lineNumbers: true, theme: 'material', mode: 'lua' }"
+                (cursorActivity)="updateCurrentLine($event)"></ngx-codemirror>
+        </div>
+    </div>
+</div>
+
+<button mat-raised-button type="button" color="primary" class="w-100 mt-3" (click)="saveScript()" disabled>
+    <!-- <span>Save Script</span> -->
+    <span>Not Yet Editable</span>
+</button>

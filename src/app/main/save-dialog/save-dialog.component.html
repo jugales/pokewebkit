@@ -1,0 +1,39 @@
+<div class="w-100 py-3 poke-sheet-header d-inline-flex justify-content-between">
+    <span class="poke-sheet-header-title">Save Confirmation</span>
+    <mat-icon (click)="close()" class="poke-sheet-header-icon rounded bg-gray cursor-pointer" matRipple>close</mat-icon>
+</div>
+
+
+<div class="row mb-3 overflow-auto" mb-3 [style.maxHeight]="'600px'">
+    <div class="col-md-6" *ngFor="let change of romService.pendingChanges | keyvalue">
+        <div class="w-100 border p-2 mb-2">
+            <h2 class="mb-0"><b>{{ change.value.changeReason }}</b><span class=" ml-2 float-right cursor-pointer text-danger poke-border-sm bg-gray py-1 px-2 undo-text" (click)="undoChange(change.value)">Undo</span></h2>
+            <p class="mb-2 text-gray">Address: 
+                <span class="hex-value" *ngIf="change.value.repointAddress">0x{{ change.value.repointAddress.toString(16).toUpperCase() + ' <- ' }}</span>
+                <span class="hex-value">0x{{ change.value.address.toString(16).toUpperCase() }}</span>
+            </p>
+        
+            <div class="bg-gray p-2">
+                <p class="mb-1" *ngIf="change.value.bytesBefore"><b>OLD</b></p>
+                <div class="w-100 mb-2" *ngIf="!change.value.isTextUpdated">
+                    <span *ngFor="let byteValue of change.value.bytesBefore" class=" hex-value"><b>{{ (byteValue.toString(16).length == 1 ? '0' : '') + byteValue.toString(16).toUpperCase() + '  ' }}</b></span>
+                </div>
+                <div class="w-100 mb-2" *ngIf="change.value.isTextUpdated">
+                    <span class="hex-value"><b>{{ characterSetService.toText(change.value.bytesBefore) }}</b></span>
+                </div>
+                
+                <p class="mb-1"><b>NEW</b></p>
+                <div class="w-100 mb-2" *ngIf="!change.value.isTextUpdated">
+                    <span *ngFor="let byteValue of change.value.bytesToWrite" class="hex-value"><b>{{ (byteValue.toString(16).length == 1 ? '0' : '') + byteValue.toString(16).toUpperCase() + '  ' }}</b></span>
+                </div>
+                <div class="w-100 mb-2" *ngIf="change.value.isTextUpdated">
+                    <span class="hex-value"><b>{{ characterSetService.toText(change.value.bytesToWrite) }}</b></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button mat-raised-button type="button" color="primary" (click)="save()" class="w-100">
+    <span>Save Changes to File</span>
+</button>

@@ -1,0 +1,214 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; background-color: #f0f0f0; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+@font-face {
+    font-family: 'P2';
+    src:  url('./assets/fonts/PressStart2P-Regular.ttf') format('truetype'),
+            url('./assets/fonts/PressStart2P-Regular.ttf') format('truetype');
+}
+
+.font-p2 {
+    font-family: 'P2', Arial, Helvetica, sans-serif !important;
+}
+
+.bg-gray {
+    background-color: #f0f0f0 !important;
+}
+.bg-gray-hover:hover {
+    background-color: #f0f0f0 !important;
+}
+.bg-gray-light {
+    background-color: rgba(230, 230, 230, 0.5)
+}
+.bg-gray-dark {
+    background-color: #222222 !important;
+}
+.text-gray {
+    color: #969696;
+}
+
+.poke-shadow-sm {
+    -webkit-box-shadow: 0 8px 6px -6px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 8px 6px -6px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 6px -6px rgba(0, 0, 0, 0.5);
+}
+
+.poke-webkit-area {
+    height: 100vh;
+}
+
+
+
+img {
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: none;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+}
+
+.image-xflip {
+    transform: scale(-1, 1);
+    -webkit-transform: scale(-1, 1);
+    -moz-transform: scale(-1, 1);
+    -o-transform: scale(-1, 1);
+    transform: scale(-1, 1);
+}
+.image-yflip {
+    transform: scale(1, -1);
+    -webkit-transform: scale(1, -1);
+    -moz-transform: scale(1, -1);
+    -o-transform: scale(1, -1);
+    transform: scale(1, -1);
+}
+.image-flip-both {
+    transform: scale(-1, -1) !important;
+    -webkit-transform: scale(-1, -1) !important;
+    -moz-transform: scale(-1, -1) !important;
+    -o-transform: scale(-1, -1) !important;
+    transform: scale(-1, -1) !important;
+}
+
+
+.poke-tool-sub-sidenav-2x {
+    width: 274px !important; /* 128 * 2 width + 18 for scrollbar */
+}
+.poke-tool-sub-sidenav-3x {
+    width: 390px !important; /* 128 * 2 width + 18 for scrollbar */
+}
+
+.poke-tool-sidenav, .poke-tool-sidenav-container {
+    min-width: 220px;
+    position: -webkit-sticky; /* Some versions of Safari need this */
+    position: sticky;
+    top: 0px;
+}
+
+.poke-tool-sidenav-item-active {
+    background-color: #b3c4d4 !important;
+}
+
+.poke-tool-sidenav-item-inner {
+    font-size: 14px;
+    line-height: 14px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.poke-tool-sidenav-item-inner:hover {
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.poke-border-sm {
+    border-radius: 8px !important;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.poke-sheet-header {
+    border-bottom: 1px solid #f0f0f0;
+}
+.poke-sheet-header-title {
+    font-size: 24px;
+    line-height: 24px;
+    font-weight: 600;
+}
+
+.border-hover:hover {
+    border: 1px solid #000;
+    cursor: pointer;
+}
+
+.border-dark {
+    border: 1px solid #000;
+}
+
+.block-hover:hover {
+    border: 1px solid black;
+    cursor: pointer;
+}
+.block-selected {
+    border: 1px solid red;
+}
+
+.hex-value {
+    font-family: 'Courier New', monospace;
+}
+
+/* script editor */
+
+/* min-height 300px too small, overriding */
+.CodeMirror {
+    min-height: 450px !important;
+}
+
+.overflow-x-auto {
+    overflow-x: auto !important;
+}
+.overflow-y-auto {
+    overflow-y: auto !important;
+}
+.overflow-x-hidden {
+    overflow-x: hidden !important;
+}
+.overflow-y-hidden {
+    overflow-y: hidden !important;
+}
+
+.phone-only {
+    display: block !important;
+}
+.phone-or-bigger {
+    display: none !important;
+}
+.tablet-or-bigger {
+    display: none !important;
+}
+
+.poke-sheet-header {
+    margin-top: 32px;
+}
+
+
+@media (min-width: 576px) { 
+    .phone-or-bigger {
+        display: block !important;
+    }
+}
+@media (min-width: 768px) { 
+    .phone-only {
+        display: none !important;
+    }
+    .tablet-or-bigger {
+        display: block !important;
+    }
+
+    .poke-sheet-header {
+        margin-top: 0px;
+    }
+
+    .poke-tool-sub-sidenav-1x, .poke-tool-sub-sidenav-2x, .poke-tool-sub-sidenav-3x {
+        width: 146px; /* 128 width + 18 for scrollbar */
+        min-height: calc(100vh - 138px - 36px - 42px - 8px) !important;
+        max-height: calc(100vh - 138px - 36px - 42px - 8px) !important; /* viewport height - header height - footer height -  */
+    }
+
+    .poke-tool-card-inner, .poke-tool-sub-sidenav-1x  {
+        min-height: calc(100vh - 137px - 8px) !important;
+        max-height: calc(100vh - 137px - 8px) !important; /* viewport height - header height - footer height */
+    }
+}

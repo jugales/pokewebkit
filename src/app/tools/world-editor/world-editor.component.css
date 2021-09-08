@@ -1,0 +1,68 @@
+@media (min-width: 768px) { 
+    .blockset-display {
+        width: calc(16px * 8px); 
+        height: calc(16px * 861px / 8px); 
+    }
+    
+    .map-wrapper-1x {
+        min-width: calc(100vw - 220px - 146px);
+        max-width: calc(100vw - 220px - 146px);
+        overflow: auto;
+    }
+    .map-wrapper-2x {
+        min-width: calc(100vw - 220px - 274px);
+        max-width: calc(100vw - 220px - 274px);
+        overflow: auto;
+    }
+    .map-wrapper-3x {
+        min-width: calc(100vw - 220px - 390px);
+        max-width: calc(100vw - 220px - 390px);
+        overflow: auto;
+    }
+}
+
+.meta-bg-0 {
+    background-color: #ff25c896;
+}
+.meta-bg-1 {
+    background-color: rgba(255, 0, 0, 0.7);
+}
+.meta-bg-4 {
+    background-color: rgba(255, 0, 150, 0.7);
+}
+.meta-bg-5 {
+    background-color: rgba(255, 0, 0, 0.7);
+}
+.meta-bg-12 {
+    background-color: #5900ffb3;
+}
+.meta-bg-13 {
+    background-color: rgba(165, 74, 0, 0.7);
+}
+.meta-bg-16 {
+    background-color: rgba(15, 165, 0, 0.7);
+}
+.meta-bg-20 {
+    background-color: #00a59aa4;
+}
+.meta-bg-28 {
+    background-color: rgba(160, 165, 0, 0.7);
+}
+.movement-overlay {
+    font-size: 14px;
+    line-height: 16px;
+    z-index: 30;
+}
+
+
+.movement-selector-preview {
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.script-fadeout {
+    background-image: linear-gradient(#f0f0f0 0%, white 95%);
+}

@@ -1,0 +1,19 @@
+<div class="w-100 h-100 d-flex justify-content-center align-items-center">
+    <mat-card class="poke-shadow-sm select-card">
+        <div class="d-flex align-items-center justify-content-center">
+            <img src="./assets/images/logo.png" alt="PokeTool logo" height="50px" />
+            <h2 class="ml-3 mb-0 font-p2 poke-title">PokéWebKit</h2>
+        </div>
+
+        <div class="bg-gray border p-2 my-3">
+            <p>Welcome to the PokéWebKit! This is a collection of online tools for editing Pokémon ROMs for the Game Boy Advance.</p>
+            <p><b>ROM data is never uploaded to our servers. Absolutely no server-side logic is used for this tool. All ROM reading and editing is done within your browser.</b></p>
+            <p class="mb-0 text-danger"><b>Only use a ROM file which is legally acquired and owned.</b></p>
+        </div>
+
+        <button mat-raised-button type="button" color="primary" (click)="fileInput.click()" class="w-100">
+            <span>Select a ROM File</span>
+            <input #fileInput type="file" (change)="onFileInput($event)" style="display:none;" />
+        </button>
+    </mat-card>
+</div>

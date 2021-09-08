@@ -1,0 +1,95 @@
+<div class="w-100 py-3 poke-sheet-header d-inline-flex justify-content-between">
+    <div>
+        <div class="w-100 d-inline-flex justify-content-between">
+            <span class="poke-sheet-header-title">Field Editor</span>
+            <mat-icon (click)="close()" class="poke-sheet-header-icon rounded bg-gray cursor-pointer" matRipple>close</mat-icon>
+        </div>
+        <p class="mb-0 mt-1 text-gray">These frames are not editable within this tool (for now). However, you may find the previews and addresses useful. Some frames may act strange because the ROM manages them with ASM/C. This is the base data before the ROM runtime manipulation.</p>
+    </div>
+    
+</div>
+
+<div class="w-100 d-inline-flex poke-tool-card-inner doorset-editor">
+    <div class="bg-gray overflow-auto tablet-or-bigger" [style.minWidth]="'230px'" [style.maxWidth]="'230px'">
+        <div class="poke-tool-sidenav bg-gray">
+            <div class="poke-tool-sidenav-item noselect" *ngFor="let fieldOverlay of worldService.overlays; let i = index">
+                <div 
+                    (click)="setCurrent(fieldOverlay)"
+                    class="poke-tool-sidenav-item-inner px-3 py-2 border-bottom" 
+                    [ngClass]="currentOverlay == fieldOverlay ? 'poke-tool-sidenav-item-active' : ''"
+                    matRipple>
+                    <span class="poke-border-sm bg-white mr-2 py-0 px-2 d-inline-flex align-items-center" [style.height]="'18px'">{{ getPaddedId(fieldOverlay.index) }}</span>
+                    <b>{{ fieldOverlay.title }}</b>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="w-100 overflow-auto p-3" *ngIf="currentOverlay">
+        <div class="w-100 phone-only">
+            <div class="row">
+                <div class="col-12">
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>Selected Field Animation</mat-label>
+                        <mat-select [(ngModel)]="currentOverlay" (ngModelChange)="setCurrent(currentOverlay)">
+                            <mat-option [value]="fieldOverlay" *ngFor="let fieldOverlay of worldService.overlays; let i = index">{{ fieldOverlay.title }}</mat-option>
+                        </mat-select>
+                    </mat-form-field> 
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <p class="mb-1"><b>Frames</b></p>
+                <img 
+                    *ngFor="let frame of currentOverlay.frames; let i = index"
+                    [src]="frame.toDataURL()" 
+                    [style.width]="(currentOverlay.frameWidth * zoom) + 'px'"
+                    [style.height]="(currentOverlay.frameHeight * zoom) + 'px'"
+                    class="d-inline-block border" 
+                    [style.zIndex]="15" />
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex flex-column w-100">
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>Animation {{ currentAnimationIndex + 1 }} of {{ currentOverlay.animations.length }}</mat-label>
+                        <mat-select [(ngModel)]="currentAnimationIndex" (ngModelChange)="setCurrentAnimation()">
+                            <mat-option 
+                                *ngFor="let animation of currentOverlay.animations; let i = index" 
+                                [value]="i">{{ currentOverlay.title }} #{{ i + 1 }}</mat-option>
+                        </mat-select>
+                    </mat-form-field> 
+
+                    <div class="w-100">
+                        <div class="d-flex flex-column justify-content-center align-items-center mb-4">
+                            <div class="d-flex flex-column justify-content-center align-items-center p-2">
+                                <img 
+                                    *ngIf="currentAnimation.currentFrame.toDataURL()"
+                                    [src]="currentAnimation.currentFrame.toDataURL()" 
+                                    width="32px" 
+                                    class="border d-block"
+                                    [style.minWidth]="currentOverlay.frameWidth * zoom + 'px'" 
+                                    [style.maxWidth]="currentOverlay.frameHeight * zoom + 'px'" 
+                                    [style.zIndex]="20" />
+                
+                                <button mat-button *ngIf="!currentAnimation.isAnimating" class="mt-2 bg-gray" (click)="playAnimation()">Play</button>
+                                <button mat-button *ngIf="currentAnimation.isAnimating" class="mt-2 bg-gray" (click)="stopAnimation()">Stop</button>
+                                <button mat-button class="mt-2 bg-gray" (click)="toggleLooping()">{{ isLooping ? 'Loop' : 'No Loop' }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex flex-column border w-100 poke-border-sm p-3 float-right">
+                    <p><b>Frame Width:</b> <br />{{ currentOverlay.frameWidth }} pixels</p>
+                    <p><b>Frame Height:</b> <br />{{ currentOverlay.frameHeight }} pixels</p>
+                    <mat-divider class="mb-3"></mat-divider>
+                    <p><b>Header Address:</b> <br />0x{{ currentOverlay.address.toString(16).toUpperCase() }}</p>
+                    <p><b>OAM Address:</b> <br />0x{{ currentOverlay.baseOamAddress.toString(16).toUpperCase() }}</p>
+                    <p><b>Animation Address:</b> <br />0x{{ currentOverlay.animationTableAddress.toString(16).toUpperCase() }}</p>
+                    <p><b>Frames Address:</b> <br />0x{{ currentOverlay.framesTableAddress.toString(16).toUpperCase() }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

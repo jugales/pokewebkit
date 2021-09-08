@@ -1,0 +1,91 @@
+<div class="w-100 py-3 poke-sheet-header d-inline-flex justify-content-between">
+    <span class="poke-sheet-header-title">Door Editor</span>
+    <mat-icon (click)="close()" class="poke-sheet-header-icon rounded bg-gray cursor-pointer" matRipple>close</mat-icon>
+</div>
+
+<div class="w-100 d-inline-flex poke-tool-card-inner doorset-editor">
+    <div class="bg-gray overflow-auto tablet-or-bigger" [style.minWidth]="'230px'">
+        <div class="poke-tool-sidenav bg-gray">
+            <div class="poke-tool-sidenav-item noselect" *ngFor="let doorset of mapDoorsets; let i = index">
+                <div 
+                    (click)="setCurrent(doorset)"
+                    class="poke-tool-sidenav-item-inner py-1 border-bottom" 
+                    [ngClass]="currentDoorset == doorset ? 'poke-tool-sidenav-item-active' : ''"
+                    matRipple>
+                    <div class="d-inline-flex align-items-center">
+                        <span class="poke-border-sm bg-white mx-2 py-0 px-2 d-inline-flex align-items-center" [style.height]="'18px'">{{ getPaddedId(i) }}</span>
+                        <div class="d-block" *ngFor="let block of doorset.blocks">
+                            <img 
+                                [src]="block" 
+                                width="32px" 
+                                class="d-block" 
+                                [style.minWidth]="'32px'" 
+                                [style.maxWidth]="'32px'" 
+                                [style.zIndex]="20" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-100 phone-only">
+        <div class="row">
+            <div class="col-12">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Selected Door Animation</mat-label>
+                    <mat-select [(ngModel)]="currentDoorset" (ngModelChange)="setCurrent(currentDoorset)">
+                        <mat-option [value]="doorset" *ngFor="let doorset of mapDoorsets; let i = index">Door #{{ i + 1 }}</mat-option>
+                    </mat-select>
+                </mat-form-field> 
+            </div>
+        </div>
+    </div>
+    <div class="w-100 pt-3 px-3" *ngIf="mapDoorsets.length == 0">
+        <div class="w-100 d-inline-flex justify-content-center text-center text-danger mb-4"><span class="p-2 border">NO DOORS FOUND FOR THIS MAP'S TILESETS</span></div>
+    </div>
+    <div class="w-100 pt-3 px-3" *ngIf="currentDoorset && currentAnimation && mapDoorsets.length > 0">
+        <div *ngIf="viewportService.isMedium" class="w-100 d-inline-flex justify-content-center text-center text-danger mb-4"><span class="p-2 border">USES BOTH CURRENT MAP TILESET PALETTE LISTS. PRIMARY TILESET PALETTES 0-{{ romService.constants().MAIN_TILESET_PALETTE_COUNT - 1 }}. SECONDARY TILESET PALETTES {{ romService.constants().MAIN_TILESET_PALETTE_COUNT }}-15. NAVIGATE TO A DOOR'S MAP IN THE WORLD EDITOR TO VIEW WITH PROPER PALETTE.</span></div>
+        
+        <div class="d-flex flex-column justify-content-center align-items-center mb-4">
+            <div class="d-flex flex-column justify-content-center align-items-center p-2">
+                <img 
+                    *ngIf="currentAnimation.currentFrame"
+                    [src]="currentAnimation.currentFrame" 
+                    width="32px" 
+                    class="border d-block"
+                    [style.minWidth]="'32px'" 
+                    [style.maxWidth]="'32px'" 
+                    [style.zIndex]="20" />
+
+                <button mat-button *ngIf="!currentAnimation.isAnimating" class="mt-2 bg-gray" (click)="playAnimation()">Play</button>
+                <button mat-button *ngIf="currentAnimation.isAnimating" class="mt-2 bg-gray" (click)="stopAnimation()">Stop</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Block ID</mat-label>
+                    <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentDoorset.blockId">
+                    <mat-hint>0-255</mat-hint>
+                </mat-form-field> 
+            </div>
+            <div class="col-md-4">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Door Type</mat-label>
+                    <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentDoorset.doorType">
+                    <mat-hint>0-255</mat-hint>
+                </mat-form-field> 
+            </div>
+            <div class="col-md-4">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Palette</mat-label>
+                    <mat-select [(ngModel)]="currentDoorset.paletteId">
+                        <mat-option *ngFor="let palette of [].constructor(16); let i = index" [value]="i">Palette {{ i }}</mat-option>
+                    </mat-select>
+                </mat-form-field> 
+            </div>
+        </div>
+    </div>
+</div>

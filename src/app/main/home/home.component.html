@@ -1,0 +1,19 @@
+<mat-card class="w-100 p-0 poke-tool-card noselect">
+    <mat-tab-group #toolGroup>
+        <mat-tab label="World" #worldTool><ng-template matTabContent><app-world-editor></app-world-editor></ng-template></mat-tab>
+        <mat-tab label="Battlefields" #battlefieldTool><ng-template matTabContent><app-battlefield-editor></app-battlefield-editor></ng-template></mat-tab>
+        <mat-tab label="Monsters" #monsterTool><ng-template matTabContent><app-monster-editor></app-monster-editor></ng-template></mat-tab>
+        <mat-tab label="Trainers" #trainerTool><ng-template matTabContent><app-trainer-editor></app-trainer-editor></ng-template></mat-tab>
+        <mat-tab label="Items" #itemTool><ng-template matTabContent><app-item-editor></app-item-editor></ng-template></mat-tab>
+        <!-- <mat-tab label="Overworlds"><app-overworld-editor></app-overworld-editor></mat-tab> hidden until the feature is started -->
+        <!-- <mat-tab label="Start"><app-game-start-editor></app-game-start-editor></mat-tab> hidden until the feature is started -->
+        <!-- <mat-tab label="Plugins"><app-plugin-editor></app-plugin-editor></mat-tab> hidden until the feature is started -->
+      </mat-tab-group>
+</mat-card>
+<div class="w-100 d-inline-flex justify-content-between align-items-center px-2" [style.height]="'36px'">
+  <span *ngIf="isLoaded">ROM loaded in {{ (romLoadTime / 1000).toFixed(1) }} seconds</span>
+  <div class="d-inline-flex">
+    <a href="https://www.pokecommunity.com/showthread.php?t=456210" target="_blank" class="mr-3">PokéCommunity</a>
+    <a href="https://github.com/jugales/pokewebkit" target="_blank">Github</a>
+  </div>
+</div>

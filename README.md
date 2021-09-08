@@ -1,26 +1,20 @@
-# PokeTool
+# PokéWebKit
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.4.
+PokéWebKit is a toolkit for editing GBA Pokémon ROM data. All logic and data within this repository is free to use, but credit is appreciated. If you would like to append a change, please create a Pull Request.
 
-## Development server
+If you discover an issue, please report it on the PokeCommunity thread: https://www.pokecommunity.com/showthread.php?t=456210
+
+## Setup
+
+Please follow the steps here if you have never ran an Angular app on your PC: https://angular.io/guide/setup-local
+
+## How to Run
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
 ## Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
 
 ## Further help
 

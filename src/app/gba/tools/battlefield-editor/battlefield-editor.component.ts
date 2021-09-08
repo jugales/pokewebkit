@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { BattlefieldService, PokeBattlefield } from 'src/app/gba/services/battlefield.service';
-import { PendingChange, RomService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
 
 @Component({
   selector: 'app-battlefield-editor',
@@ -14,11 +14,11 @@ export class BattlefieldEditorComponent {
 
   public currentBattlefield: PokeBattlefield;
 
-  constructor(private romService: RomService, public battlefieldService: BattlefieldService) { 
-    if (this.romService.isLoaded()) 
+  constructor(private gbaService: GbaService, public battlefieldService: BattlefieldService) { 
+    if (this.gbaService.isLoaded()) 
     this.loadBattlefields();
 
-    this.romService.romLoaded.subscribe(() => {
+    this.gbaService.romLoaded.subscribe(() => {
       this.loadBattlefields();
     });
   }
@@ -44,14 +44,14 @@ export class BattlefieldEditorComponent {
 
     let writeBuffer = new ArrayBuffer(20);
     let writeView = new DataView(writeBuffer);
-    writeView.setUint32(0, this.romService.toPointer(this.currentBattlefield.backgroundAddress), true);
-    writeView.setUint32(4, this.romService.toPointer(this.currentBattlefield.backgroundTileAddress), true);
-    writeView.setUint32(8, this.romService.toPointer(this.currentBattlefield.entryImageAddress), true);
-    writeView.setUint32(12, this.romService.toPointer(this.currentBattlefield.entryImageTileAddress), true);
-    writeView.setUint32(16, this.romService.toPointer(this.currentBattlefield.paletteAddress), true);
+    writeView.setUint32(0, this.gbaService.toPointer(this.currentBattlefield.backgroundAddress), true);
+    writeView.setUint32(4, this.gbaService.toPointer(this.currentBattlefield.backgroundTileAddress), true);
+    writeView.setUint32(8, this.gbaService.toPointer(this.currentBattlefield.entryImageAddress), true);
+    writeView.setUint32(12, this.gbaService.toPointer(this.currentBattlefield.entryImageTileAddress), true);
+    writeView.setUint32(16, this.gbaService.toPointer(this.currentBattlefield.paletteAddress), true);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public getPaddedId(id: number) {

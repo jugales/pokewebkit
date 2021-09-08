@@ -6,7 +6,7 @@ import { saveAs } from 'file-saver-es';
 @Injectable({
   providedIn: 'root'
 })
-export class RomService {
+export class GbaService {
 
   private HEADER_TITLE_ADDRESS: number = 0xA0;
   private HEADER_TITLE_LENGTH: number = 12;

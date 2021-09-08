@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CharacterSetService } from 'src/app/gba/services/character-set.service';
 import { ItemService, PokeItem } from 'src/app/gba/services/item.service';
-import { PendingChange, RomService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
 import { ViewportService } from 'src/app/gba/services/viewport.service';
 
 @Component({
@@ -16,12 +16,12 @@ export class ItemEditorComponent implements OnInit {
   public sprite: any;
   public gameCode: string = '';
 
-  constructor(public romService: RomService, public itemService: ItemService,
+  constructor(public gbaService: GbaService, public itemService: ItemService,
     public viewportService: ViewportService, private characterSetService: CharacterSetService) { 
-    if (this.romService.isLoaded()) 
+    if (this.gbaService.isLoaded()) 
       this.loadItems();
   
-    this.romService.romLoaded.subscribe(() => {
+    this.gbaService.romLoaded.subscribe(() => {
       this.loadItems();
     });
   }
@@ -30,7 +30,7 @@ export class ItemEditorComponent implements OnInit {
   }
 
   private async loadItems() {
-    this.gameCode = this.romService.header.gameCode;
+    this.gameCode = this.gbaService.header.gameCode;
     this.itemService.loadItems();
     this.itemService.isLoaded = true;
 
@@ -73,23 +73,23 @@ export class ItemEditorComponent implements OnInit {
     writeView.setUint8(19, this.currentItem.parameter);
 
     let descriptionAddress = this.currentItem.descriptionAddress;
-    if (this.romService.pendingChanges.has(this.currentItem.uid + '-item-description-change')) {
-      if (this.romService.pendingChanges.get(this.currentItem.uid + '-item-description-change').repointAddress) {
-        descriptionAddress = this.romService.pendingChanges.get(this.currentItem.uid + '-item-description-change').repointAddress;
+    if (this.gbaService.pendingChanges.has(this.currentItem.uid + '-item-description-change')) {
+      if (this.gbaService.pendingChanges.get(this.currentItem.uid + '-item-description-change').repointAddress) {
+        descriptionAddress = this.gbaService.pendingChanges.get(this.currentItem.uid + '-item-description-change').repointAddress;
       }
     }
       
-    writeView.setUint32(20, this.romService.toPointer(descriptionAddress), true);
+    writeView.setUint32(20, this.gbaService.toPointer(descriptionAddress), true);
     writeView.setUint16(24, this.currentItem.mysteryValue, true);
     writeView.setUint8(26, this.currentItem.pocket);
     writeView.setUint8(27, this.currentItem.type);
-    writeView.setUint32(28, this.romService.toPointer(this.currentItem.fieldUsageCodeAddress), true);
+    writeView.setUint32(28, this.gbaService.toPointer(this.currentItem.fieldUsageCodeAddress), true);
     writeView.setUint32(32, this.currentItem.battleUsage, true);
-    writeView.setUint32(36, this.romService.toPointer(this.currentItem.battleUsageCodeAddress), true);
+    writeView.setUint32(36, this.gbaService.toPointer(this.currentItem.battleUsageCodeAddress), true);
     writeView.setUint32(40, this.currentItem.extraParameter, true);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public descriptionChanged() {
@@ -105,18 +105,18 @@ export class ItemEditorComponent implements OnInit {
     pendingChange.isTextUpdated = true;
 
     if (shouldRepoint) {
-      pendingChange.repointAddress = this.romService.findFreeSpaceAddresses(this.currentItemDescription.length + 64, 1)[0];
+      pendingChange.repointAddress = this.gbaService.findFreeSpaceAddresses(this.currentItemDescription.length + 64, 1)[0];
       pendingChange.repointAt = [this.currentItem.address + 20];
 
-      if (this.romService.pendingChanges.has(this.currentItem.address + '-changed')) {
-        let baseDataChange: PendingChange = this.romService.pendingChanges.get(this.currentItem.address + '-changed');
+      if (this.gbaService.pendingChanges.has(this.currentItem.address + '-changed')) {
+        let baseDataChange: PendingChange = this.gbaService.pendingChanges.get(this.currentItem.address + '-changed');
         let writeView = new DataView(baseDataChange.bytesToWrite);
-        writeView.setUint32(20, this.romService.toPointer(pendingChange.repointAddress), true);
-        this.romService.pendingChanges.set(this.currentItem.address + '-changed', baseDataChange);
+        writeView.setUint32(20, this.gbaService.toPointer(pendingChange.repointAddress), true);
+        this.gbaService.pendingChanges.set(this.currentItem.address + '-changed', baseDataChange);
       }
     }
       
 
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 }

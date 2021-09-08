@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { RomService } from './rom.service';
+import { GbaService } from './rom.service';
 
 const LZ77_OPCODE = 0x10;
 const TILE_SIZE = 8;
@@ -9,7 +9,7 @@ const TILE_SIZE = 8;
 })
 export class BitmapService {
 
-  constructor(private romService: RomService) { }
+  constructor(private gbaService: GbaService) { }
 
 
   public createBitmap(pixels: BitmapPixelData, palette: BitmapPalette, width: number, height?: number, hasTransparency?: boolean) {
@@ -136,7 +136,7 @@ export class BitmapService {
   }
 
   public decompressLz77(startPosition: number) {
-    if (this.romService.getByteAt(startPosition) != LZ77_OPCODE) {
+    if (this.gbaService.getByteAt(startPosition) != LZ77_OPCODE) {
       console.log('Invalid LZ77 Opcode');
       return [];
     }
@@ -146,13 +146,13 @@ export class BitmapService {
     let flagged: boolean = false;
 
     while (position < data.length) {
-      flags = this.romService.getByte();
+      flags = this.gbaService.getByte();
       for (let i = 0; i < 8; i++) {
         flagged = (flags & (0x80 >> i)) > 0;
         if (flagged) {
-          value = this.romService.getByte();
+          value = this.gbaService.getByte();
           length = (value >> 4) + 3;
-          offset = ((value & 0x0F) << 8) | this.romService.getByte();
+          offset = ((value & 0x0F) << 8) | this.gbaService.getByte();
           destination = position;
 
           if (offset > position) {
@@ -163,7 +163,7 @@ export class BitmapService {
           for (let j = 0; j < length; j++)
             data[position++] = data[destination - offset - 1 + j];
         } else {
-          value = this.romService.getByte();
+          value = this.gbaService.getByte();
           if (position < data.length)
             data[position++] = value;
           else if (value == 0)
@@ -178,9 +178,9 @@ export class BitmapService {
   private getDecompressLz77Length() {
     let length = 0;
     for (let i = 0; i < 3; i++)
-      length |= (this.romService.getByte() << (i * 8));
+      length |= (this.gbaService.getByte() << (i * 8));
     if (length == 0)
-      length = this.romService.getInt();
+      length = this.gbaService.getInt();
     return length;
   }
 
@@ -202,17 +202,17 @@ export class BitmapPixelData {
     public depth?: BitmapPixelDepth,
     public values?: any[],
     private bitmapService?: BitmapService,
-    private romService?: RomService
+    private gbaService?: GbaService
   ) { 
     if (!this.values)
       this.values = [];
 
     if (address) {
-      let lz77Check = this.romService.getByteAt(address);
+      let lz77Check = this.gbaService.getByteAt(address);
       if (!values && lz77Check == 0x10) {
         this.values = this.bitmapService.decompressLz77(address);
       } else {
-        this.values = this.romService.getBytes(2048);
+        this.values = this.gbaService.getBytes(2048);
       }
     }
   }
@@ -236,7 +236,7 @@ export class BitmapPalette {
     public values: number[] = [],
     public colors: any[] = [],
     public bitmapService?: BitmapService,
-    public romService?: RomService,
+    public gbaService?: GbaService,
     public internalId?: number
   ) { 
     if (!this.values)
@@ -245,13 +245,13 @@ export class BitmapPalette {
       this.colors = new Array(paletteSize);
 
     if (address) {
-      let lz77Check = this.romService.getByteAt(address);
+      let lz77Check = this.gbaService.getByteAt(address);
       if (lz77Check == 0x10) {
         this.values = this.bitmapService.decompressLz77(address);
       } else {
-        this.romService.goTo(address);
+        this.gbaService.goTo(address);
         for (let i = 0; i < paletteSize * 2; i++)
-          this.values.push(this.romService.getByteAt(address + i));
+          this.values.push(this.gbaService.getByteAt(address + i));
       }
     }
 
@@ -281,7 +281,7 @@ export class BitmapPalette {
 			colors[i] = this.colors[i + start];
 		}
 		
-		return new BitmapPalette(address, undefined, values, colors, this.bitmapService, this.romService);
+		return new BitmapPalette(address, undefined, values, colors, this.bitmapService, this.gbaService);
 	}
 }
 export class BitmapTilemap {
@@ -299,15 +299,15 @@ export class BitmapTilemap {
     public tilemapType?: BitmapTilemapType,
     public length?: number,
     public bitmapService?: BitmapService,
-    public romService?: RomService
+    public gbaService?: GbaService
   ) { 
     let values: any[] = undefined;
-    let lz77Flag = this.romService.getByteAt(tilemapAddress);
+    let lz77Flag = this.gbaService.getByteAt(tilemapAddress);
     if (lz77Flag == 0x10) 
       values = this.bitmapService.decompressLz77(tilemapAddress);
     else {
       for (let i = 0; i < (length ? length : this.DEFAULT_LENGTH); i++)
-        values.push(this.romService.getByteAt(tilemapAddress + i));
+        values.push(this.gbaService.getByteAt(tilemapAddress + i));
     }
       
     this.load(values, tilemapType);

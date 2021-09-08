@@ -45,7 +45,7 @@
         <div class="w-100 d-inline-flex justify-content-center text-center text-danger mb-4"><span class="p-2 border">NO DOORS FOUND FOR THIS MAP'S TILESETS</span></div>
     </div>
     <div class="w-100 pt-3 px-3" *ngIf="currentDoorset && currentAnimation && mapDoorsets.length > 0">
-        <div *ngIf="viewportService.isMedium" class="w-100 d-inline-flex justify-content-center text-center text-danger mb-4"><span class="p-2 border">USES BOTH CURRENT MAP TILESET PALETTE LISTS. PRIMARY TILESET PALETTES 0-{{ romService.constants().MAIN_TILESET_PALETTE_COUNT - 1 }}. SECONDARY TILESET PALETTES {{ romService.constants().MAIN_TILESET_PALETTE_COUNT }}-15. NAVIGATE TO A DOOR'S MAP IN THE WORLD EDITOR TO VIEW WITH PROPER PALETTE.</span></div>
+        <div *ngIf="viewportService.isMedium" class="w-100 d-inline-flex justify-content-center text-center text-danger mb-4"><span class="p-2 border">USES BOTH CURRENT MAP TILESET PALETTE LISTS. PRIMARY TILESET PALETTES 0-{{ gbaService.constants().MAIN_TILESET_PALETTE_COUNT - 1 }}. SECONDARY TILESET PALETTES {{ gbaService.constants().MAIN_TILESET_PALETTE_COUNT }}-15. NAVIGATE TO A DOOR'S MAP IN THE WORLD EDITOR TO VIEW WITH PROPER PALETTE.</span></div>
         
         <div class="d-flex flex-column justify-content-center align-items-center mb-4">
             <div class="d-flex flex-column justify-content-center align-items-center p-2">

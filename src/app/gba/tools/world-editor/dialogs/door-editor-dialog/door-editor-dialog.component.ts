@@ -1,7 +1,7 @@
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BitmapAnimation, BitmapService } from 'src/app/gba/services/bitmap.service';
-import { RomService } from 'src/app/gba/services/rom.service';
+import { GbaService } from 'src/app/gba/services/rom.service';
 import { ViewportService } from 'src/app/gba/services/viewport.service';
 import { WorldService } from 'src/app/gba/services/world.service';
 import { MapBlock, PokeDoor, PokeMap } from 'src/app/gba/services/world-structures';
@@ -23,7 +23,7 @@ export class DoorEditorDialogComponent implements OnInit {
   private intervalRef: any;
 
   constructor(public dialog: MatDialog, @Inject(MAT_DIALOG_DATA) public data: any, 
-    public romService: RomService, public worldService: WorldService, public bitmapService: BitmapService,
+    public gbaService: GbaService, public worldService: WorldService, public bitmapService: BitmapService,
     private zone: NgZone, public viewportService: ViewportService) { 
     this.currentMap = data.currentMap;
 
@@ -32,7 +32,7 @@ export class DoorEditorDialogComponent implements OnInit {
   ngOnInit(): void {
     this.doorsets = this.worldService.getAllDoorsets(this.currentMap.layout.primaryTileset.palettes);
     for (let i = 0; i < 861; i++) {
-      let block: MapBlock = this.currentMap.blockset.getBlock(i, this.romService, this.bitmapService);
+      let block: MapBlock = this.currentMap.blockset.getBlock(i, this.gbaService, this.bitmapService);
 
       if (block.behaviorId == 0x69) {
         for (let j = 0; j < this.doorsets.length; j++) {

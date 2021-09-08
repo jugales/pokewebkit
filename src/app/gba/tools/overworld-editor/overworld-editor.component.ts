@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { OverworldService, PokeOverworldSprite } from 'src/app/gba/services/overworld.service';
-import { RomService } from 'src/app/gba/services/rom.service';
+import { GbaService } from 'src/app/gba/services/rom.service';
 import { OverworldPaletteEditorDialogComponent } from './dialogs/overworld-palette-editor-dialog/overworld-palette-editor-dialog.component';
 
 @Component({
@@ -16,7 +16,7 @@ export class OverworldEditorComponent implements OnInit {
 
   public isLoaded: boolean = false;
 
-  constructor(public romService: RomService, public overworldService: OverworldService,
+  constructor(public gbaService: GbaService, public overworldService: OverworldService,
     private dialog: MatDialog) { }
 
   ngOnInit(): void {

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { RomHeader, RomService } from 'src/app/gba/services/rom.service';
+import { RomHeader, GbaService } from 'src/app/gba/services/rom.service';
 
 @Component({
   selector: 'app-rom-landing',
@@ -10,11 +10,11 @@ import { RomHeader, RomService } from 'src/app/gba/services/rom.service';
 })
 export class RomLandingComponent implements OnInit {
 
-  constructor(private romService: RomService, private title: Title, private router: Router) { }
+  constructor(private gbaService: GbaService, private title: Title, private router: Router) { }
 
   ngOnInit(): void {
-    this.romService.romLoaded.subscribe(() => {
-      let header: RomHeader = this.romService.header;
+    this.gbaService.romLoaded.subscribe(() => {
+      let header: RomHeader = this.gbaService.header;
       let title: string = 'PokéWebKit: ' + header.title + ' (' + header.gameCode + ')' + (header.version == 1 ? 'v1.1' : '');
       this.title.setTitle(title);
 
@@ -26,12 +26,12 @@ export class RomLandingComponent implements OnInit {
     let r = new FileReader();
 
     // can't use class variables in the onload
-    let romService: RomService = this.romService;
+    let gbaService: GbaService = this.gbaService;
     let router: Router = this.router; 
     r.onload = function() {
       let startTime: number = Date.now();
       let fileData = r.result;
-      romService.loadRom(fileData as ArrayBuffer, startTime);
+      gbaService.loadRom(fileData as ArrayBuffer, startTime);
 
       router.navigate(['/']);
     }

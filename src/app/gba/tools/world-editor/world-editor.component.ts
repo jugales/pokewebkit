@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
-import { PendingChange, RomService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
 import { WorldService } from 'src/app/gba/services/world.service';
 import { MapBlock, MapBlockData, MapBlockTile, MapFieldOverlay, MapFieldOverlayDrawable, MapNPCData, MapScriptData, MapSignData, MapWarpData, PokeMap, WildMonsterData } from 'src/app/gba/services/world-structures';
 import { BitmapService } from 'src/app/gba/services/bitmap.service';
@@ -79,7 +79,7 @@ export class WorldEditorComponent implements OnInit {
   public isBlocksetRendered: boolean = false;
   public isBlockChanged: boolean = false;
 
-  constructor(public romService: RomService, public worldService: WorldService, 
+  constructor(public gbaService: GbaService, public worldService: WorldService, 
     private changeDetector: ChangeDetectorRef, public bitmapService: BitmapService, 
     private scriptService: PorkyScriptService, private dialog: MatDialog,
     private overworldService: OverworldService, private zone: NgZone,
@@ -105,10 +105,10 @@ export class WorldEditorComponent implements OnInit {
     this.currentPaintBlockCanvas = document.createElement('canvas');
     this.currentPaintBlockContext = this.currentPaintBlockCanvas.getContext('2d');
     
-    if (this.romService.isLoaded()) 
+    if (this.gbaService.isLoaded()) 
       this.loadWorld();
   
-    this.romService.romLoaded.subscribe(() => {
+    this.gbaService.romLoaded.subscribe(() => {
       this.loadWorld();
     });
   }
@@ -121,8 +121,8 @@ export class WorldEditorComponent implements OnInit {
   }
 
   private async loadWorld() {
-    this.defaultBank = <number>this.romService.constants().DEFAULT_MAP.split('.')[0];
-    this.defaultMap = <number>this.romService.constants().DEFAULT_MAP.split('.')[1];
+    this.defaultBank = <number>this.gbaService.constants().DEFAULT_MAP.split('.')[0];
+    this.defaultMap = <number>this.gbaService.constants().DEFAULT_MAP.split('.')[1];
 
     if (this.worldService.maps.length == 0)
       this.worldService.loadWorld();
@@ -133,7 +133,7 @@ export class WorldEditorComponent implements OnInit {
     if (!this.currentMap.header)
       this.setCurrent(this.worldService.maps[this.defaultBank][this.defaultMap], this.defaultBank, this.defaultMap);
 
-    this.romService.markLoaded();
+    this.gbaService.markLoaded();
   }
 
   public setCurrent(map: PokeMap, bankId?: number, mapId?: number) {
@@ -307,7 +307,7 @@ export class WorldEditorComponent implements OnInit {
   }
 
   public goToTrainer(trainerId: number) {
-    this.romService.toolSwitched.emit({tool: 'trainerTool' });
+    this.gbaService.toolSwitched.emit({tool: 'trainerTool' });
     this.trainerService.trainerIndexChanged.emit(trainerId);
   }
 
@@ -337,7 +337,7 @@ export class WorldEditorComponent implements OnInit {
   public drawBlockset() {
     
     for (let i = 0; i < 861; i++) {
-      let block: MapBlock = this.currentMap.blockset.getBlock(i, this.romService, this.bitmapService);
+      let block: MapBlock = this.currentMap.blockset.getBlock(i, this.gbaService, this.bitmapService);
       let blockX = i * this.TILE_SIZE % this.currentBlocksetCanvas.width;
       let blockY = Math.floor((i * this.TILE_SIZE / this.currentBlocksetCanvas.width)) * this.TILE_SIZE;
 
@@ -364,7 +364,7 @@ export class WorldEditorComponent implements OnInit {
     for (let row = 0; row < this.currentMap.layout.mapHeight; row++) {
       for (let col = 0; col < this.currentMap.layout.mapWidth; col++) {
         let blockId: number = this.currentMap.blockData.blockIds[row * this.currentMap.layout.mapWidth + col];
-        let blockData: MapBlock = this.currentMap.blockset.getBlock(blockId, this.romService, this.bitmapService);
+        let blockData: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
         let blockX: number = col * this.TILE_SIZE;
         let blockY: number = row * this.TILE_SIZE;
 
@@ -405,7 +405,7 @@ export class WorldEditorComponent implements OnInit {
     for (let row = 0; row < this.currentMap.layout.mapHeight; row++) {
       for (let col = 0; col < this.currentMap.layout.mapWidth; col++) {
         let blockId: number = this.currentMap.blockData.blockIds[row * this.currentMap.layout.mapWidth + col];
-        let blockData: MapBlock = this.currentMap.blockset.getBlock(blockId, this.romService, this.bitmapService);
+        let blockData: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
         let blockX: number = col * this.TILE_SIZE;
         let blockY: number = row * this.TILE_SIZE;
 
@@ -452,7 +452,7 @@ export class WorldEditorComponent implements OnInit {
 
   public paintBlockSelected(i) {
     this.currentPaintBlockId = i;
-    this.currentPaintBlock = this.currentMap.blockset.getBlock(i, this.romService, this.bitmapService);
+    this.currentPaintBlock = this.currentMap.blockset.getBlock(i, this.gbaService, this.bitmapService);
 
     this.drawPaintBlock();
   }
@@ -480,14 +480,14 @@ export class WorldEditorComponent implements OnInit {
       pendingChange.changeReason = this.currentMap.label + ' ' + ' Block Changed at X:' + x + ', Y:' + y;
       pendingChange.key = this.currentMap.layout.tileDataAddress + '-' + x + '-' + y + '-' + blockMapId;
       pendingChange.address = this.currentMap.layout.tileDataAddress + (blockMapId * 2);
-      let blockIdBits: string = this.romService.toBitString(this.currentMap.blockData.blockIds[blockMapId], 10);
-      let blockMetaBits: string = this.romService.toBitString(this.currentMap.blockData.blockMetas[blockMapId], 6);
+      let blockIdBits: string = this.gbaService.toBitString(this.currentMap.blockData.blockIds[blockMapId], 10);
+      let blockMetaBits: string = this.gbaService.toBitString(this.currentMap.blockData.blockMetas[blockMapId], 6);
       let bitValue: string = blockMetaBits + blockIdBits;
       let blockValue: number = Number.parseInt(bitValue, 2);
-      pendingChange.bytesToWrite = this.romService.bytesFromShort(blockValue);
-      this.romService.goTo(pendingChange.address);
-      pendingChange.bytesBefore = this.romService.getBytes(pendingChange.bytesToWrite.length);
-      this.romService.queueChange(pendingChange); // map allows automatic overwriting of existing pending changes (to prevent duplicate write errors)
+      pendingChange.bytesToWrite = this.gbaService.bytesFromShort(blockValue);
+      this.gbaService.goTo(pendingChange.address);
+      pendingChange.bytesBefore = this.gbaService.getBytes(pendingChange.bytesToWrite.length);
+      this.gbaService.queueChange(pendingChange); // map allows automatic overwriting of existing pending changes (to prevent duplicate write errors)
     }
 
     if (this.currentWorldTool == 'encounters') {
@@ -502,7 +502,7 @@ export class WorldEditorComponent implements OnInit {
     }
 
     if (this.currentWorldTool == 'behavior' && this.isBehaviorBlock(this.currentMap.blockData.blockIds[blockMapId])) {
-      let block: MapBlock = this.currentMap.blockset.getBlock(this.currentMap.blockData.blockIds[blockMapId], this.romService, this.bitmapService);
+      let block: MapBlock = this.currentMap.blockset.getBlock(this.currentMap.blockData.blockIds[blockMapId], this.gbaService, this.bitmapService);
       
       if (block.behaviorId == 2 || block.behaviorId == 22) {    
         let copyOfOverlay: MapFieldOverlay = undefined;
@@ -722,13 +722,13 @@ export class WorldEditorComponent implements OnInit {
     writeView.setUint8(12, this.currentNPC.isTrainer ? 1 : 0);
     writeView.setUint8(13, pendingChange.bytesBefore[13]); // unknown
     writeView.setUint16(14, this.currentNPC.viewRadius, true);
-    writeView.setUint32(16, this.currentNPC.scriptAddress > 0 ? this.romService.toPointer(this.currentNPC.scriptAddress) : 0, true);
+    writeView.setUint32(16, this.currentNPC.scriptAddress > 0 ? this.gbaService.toPointer(this.currentNPC.scriptAddress) : 0, true);
     writeView.setUint16(20, this.currentNPC.personId, true);
     writeView.setUint8(22, pendingChange.bytesBefore[22]); // unknown
     writeView.setUint8(23, pendingChange.bytesBefore[23]); // unknown
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public signChanged() {
@@ -749,7 +749,7 @@ export class WorldEditorComponent implements OnInit {
     writeView.setUint8(6, pendingChange.bytesBefore[6]); // unknown
     writeView.setUint8(7, pendingChange.bytesBefore[7]); // unknown
     if (!(this.currentSign.signType == 5 || this.currentSign.signType == 6 || this.currentSign.signType == 7)) {
-      writeView.setUint32(8, this.romService.toPointer(this.currentSign.scriptAddress), true);
+      writeView.setUint32(8, this.gbaService.toPointer(this.currentSign.scriptAddress), true);
     } else {
       writeView.setUint16(8, this.currentSign.hiddenItemId, true);
       writeView.setUint8(9, this.currentSign.globalHiddenIndex);
@@ -757,7 +757,7 @@ export class WorldEditorComponent implements OnInit {
     }
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public warpChanged() {
@@ -779,7 +779,7 @@ export class WorldEditorComponent implements OnInit {
     writeView.setUint8(7, this.currentWarp.destinationBank);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public scriptChanged() {
@@ -801,10 +801,10 @@ export class WorldEditorComponent implements OnInit {
     writeView.setUint16(8, this.currentScript.varValue, true);
     writeView.setUint8(10, pendingChange.bytesBefore[10]); // unknown
     writeView.setUint8(11, pendingChange.bytesBefore[11]); // unknown
-    writeView.setUint32(12, this.romService.toPointer(this.currentScript.scriptAddress), true);
+    writeView.setUint32(12, this.gbaService.toPointer(this.currentScript.scriptAddress), true);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public encounterChanged(monster: WildMonsterData) {
@@ -823,7 +823,7 @@ export class WorldEditorComponent implements OnInit {
     writeView.setUint16(2, monster.monsterId, true);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public metadataChanged() {
@@ -837,10 +837,10 @@ export class WorldEditorComponent implements OnInit {
     let writeView = new DataView(writeBuffer);
 
     // write bytes in little endian
-    writeView.setUint32(0, this.romService.toPointer(this.currentMap.header.mapDataAddress), true);
-    writeView.setUint32(4, this.romService.toPointer(this.currentMap.header.eventDataAddress), true);
-    writeView.setUint32(8, this.romService.toPointer(this.currentMap.header.mapScriptsAddress), true);
-    writeView.setUint32(12, this.romService.toPointer(this.currentMap.header.connectionsAddress), true);
+    writeView.setUint32(0, this.gbaService.toPointer(this.currentMap.header.mapDataAddress), true);
+    writeView.setUint32(4, this.gbaService.toPointer(this.currentMap.header.eventDataAddress), true);
+    writeView.setUint32(8, this.gbaService.toPointer(this.currentMap.header.mapScriptsAddress), true);
+    writeView.setUint32(12, this.gbaService.toPointer(this.currentMap.header.connectionsAddress), true);
     writeView.setUint16(16, this.currentMap.header.musicId, true);
     writeView.setUint16(18, this.currentMap.header.mapIndex, true);
     writeView.setUint8(20, this.currentMap.header.labelIndex);
@@ -853,11 +853,11 @@ export class WorldEditorComponent implements OnInit {
     writeView.setUint8(27, this.currentMap.header.battlefieldType);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public isBehaviorBlock(blockId: number) {
-    let block: MapBlock = this.currentMap.blockset.getBlock(blockId, this.romService, this.bitmapService);
+    let block: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
     if (block.behaviorId == 2 || block.behaviorId == 209)  // grass animation
       return true;
     if (block.behaviorId == 22)  // ripple (puddle) animation
@@ -871,7 +871,7 @@ export class WorldEditorComponent implements OnInit {
   }
 
   public isGrassEncounterBlock(blockId: number) {
-    let block: MapBlock = this.currentMap.blockset.getBlock(blockId, this.romService, this.bitmapService);
+    let block: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
     if (block.behaviorId == 2 || block.behaviorId == 209)  
       return true; // grass encounter possible
 
@@ -879,7 +879,7 @@ export class WorldEditorComponent implements OnInit {
   }
 
   public isSurfEncounterBlock(blockId: number) {
-    let block: MapBlock = this.currentMap.blockset.getBlock(blockId, this.romService, this.bitmapService);
+    let block: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
 
     if (block.behaviorId == 16 || block.behaviorId == 17 || block.behaviorId == 21) 
       return true; // water encounter possible

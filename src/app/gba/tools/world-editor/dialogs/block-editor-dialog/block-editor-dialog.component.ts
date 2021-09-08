@@ -1,7 +1,7 @@
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BitmapAnimation, BitmapService } from 'src/app/gba/services/bitmap.service';
-import { RomService } from 'src/app/gba/services/rom.service';
+import { GbaService } from 'src/app/gba/services/rom.service';
 import { WorldService } from 'src/app/gba/services/world.service';
 import { MapBlock, PokeDoor, PokeMap } from 'src/app/gba/services/world-structures';
 
@@ -36,7 +36,7 @@ export class BlockEditorDialogComponent implements OnInit {
   private renderInterval: any;
 
   constructor(public dialog: MatDialog, @Inject(MAT_DIALOG_DATA) public data: any, 
-    public romService: RomService, public worldService: WorldService, public bitmapService: BitmapService,
+    public gbaService: GbaService, public worldService: WorldService, public bitmapService: BitmapService,
     private zone: NgZone) { 
     this.blockLayers =  document.createElement('canvas');
     this.blockLayersContext = this.blockLayers.getContext('2d');
@@ -59,7 +59,7 @@ export class BlockEditorDialogComponent implements OnInit {
 
   public selectBlock(index: number) {
     this.selectedBlockId = index;
-    this.selectedBlock = this.currentMap.blockset.getBlock(this.selectedBlockId, this.romService, this.bitmapService);
+    this.selectedBlock = this.currentMap.blockset.getBlock(this.selectedBlockId, this.gbaService, this.bitmapService);
 
     if (this.renderInterval)
       clearInterval(this.renderInterval);
@@ -181,8 +181,8 @@ export class BlockEditorDialogComponent implements OnInit {
       let name: string = '???';
       switch (i) {
         case 0x00: name = 'Normal'; break;
-        case 0x10: if (this.romService.header.gameCode == 'BPEE') name = 'Overworlds Cover Block'; break; 
-        case 0x20: if (this.romService.header.gameCode.startsWith('BPRE')) name = 'Overworlds Cover Block'; break; 
+        case 0x10: if (this.gbaService.header.gameCode == 'BPEE') name = 'Overworlds Cover Block'; break; 
+        case 0x20: if (this.gbaService.header.gameCode.startsWith('BPRE')) name = 'Overworlds Cover Block'; break; 
         default:
           name = '???'
       }

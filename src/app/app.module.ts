@@ -9,7 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material.module';
 import { RomSelectComponent } from './rom-select/rom-select.component';
 import { FormsModule } from '@angular/forms';
-import { RomService } from './gba/services/rom.service';
+import { GbaService } from './gba/services/rom.service';
 import { CharacterSetService } from './gba/services/character-set.service';
 import { MonsterService } from './gba/services/monster.service';
 import { SaveDialogComponent } from './gba/save-dialog/save-dialog.component';
@@ -32,7 +32,7 @@ import { CodemirrorModule } from '@ctrl/ngx-codemirror';
     CodemirrorModule
   ],
   providers: [
-    RomService,
+    GbaService,
     CharacterSetService,
     MonsterService
   ],

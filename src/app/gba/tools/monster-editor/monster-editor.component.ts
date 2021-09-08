@@ -2,7 +2,7 @@ import { Byte } from '@angular/compiler/src/util';
 import { Component, OnInit } from '@angular/core';
 import { ItemService } from 'src/app/gba/services/item.service';
 import { Monster, MonsterService } from 'src/app/gba/services/monster.service';
-import { PendingChange, RomService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
 
 @Component({
   selector: 'app-monster-editor',
@@ -20,11 +20,11 @@ export class MonsterEditorComponent implements OnInit {
   
 
   constructor(public monsterService: MonsterService, public itemService: ItemService, 
-    public romService: RomService) { 
-    if (this.romService.isLoaded()) 
+    public gbaService: GbaService) { 
+    if (this.gbaService.isLoaded()) 
       this.loadMonsters();
     
-    this.romService.romLoaded.subscribe(() => {
+    this.gbaService.romLoaded.subscribe(() => {
       this.loadMonsters();
     });
   }
@@ -88,7 +88,7 @@ export class MonsterEditorComponent implements OnInit {
     writeView.setUint8(25, this.currentMonster.baseStats.colorAndFlip);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public getPaddedId(id: number) {
@@ -101,12 +101,12 @@ export class MonsterEditorComponent implements OnInit {
 
   private getCurrentMonsterEV() {
     let evBinaryString = '0000';
-    evBinaryString += this.romService.toBitString(this.currentMonster.baseStats.spDefenseYield, 2);
-    evBinaryString += this.romService.toBitString(this.currentMonster.baseStats.spAttackYield, 2);
-    evBinaryString += this.romService.toBitString(this.currentMonster.baseStats.speedYield, 2);
-    evBinaryString += this.romService.toBitString(this.currentMonster.baseStats.defenseYield, 2);
-    evBinaryString += this.romService.toBitString(this.currentMonster.baseStats.attackYield, 2);
-    evBinaryString += this.romService.toBitString(this.currentMonster.baseStats.hpYield, 2);
+    evBinaryString += this.gbaService.toBitString(this.currentMonster.baseStats.spDefenseYield, 2);
+    evBinaryString += this.gbaService.toBitString(this.currentMonster.baseStats.spAttackYield, 2);
+    evBinaryString += this.gbaService.toBitString(this.currentMonster.baseStats.speedYield, 2);
+    evBinaryString += this.gbaService.toBitString(this.currentMonster.baseStats.defenseYield, 2);
+    evBinaryString += this.gbaService.toBitString(this.currentMonster.baseStats.attackYield, 2);
+    evBinaryString += this.gbaService.toBitString(this.currentMonster.baseStats.hpYield, 2);
     
     let result = Number.parseInt(evBinaryString, 2);
     return result;

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AssemblyService } from './assembly.service';
 import { BitmapAnimation, BitmapPalette, BitmapPixelData, BitmapPixelDepth, BitmapService } from './bitmap.service';
 import { OverworldService } from './overworld.service';
-import { RomService } from './rom.service';
+import { GbaService } from './rom.service';
 import { MapBlock, MapBlockData, MapBlockset, MapBlockTile, MapEncounterData, MapEntityData, MapFieldOverlay, MapHeader, MapLayout, MapTileset, PokeDoor, PokeMap } from './world-structures';
 
 @Injectable({
@@ -19,26 +19,26 @@ export class WorldService {
   public overlays: MapFieldOverlay[] = [];
   public overlayBaseOAMs: any[] = [];
 
-  constructor(private romService: RomService, private bitmapService: BitmapService,
+  constructor(private gbaService: GbaService, private bitmapService: BitmapService,
     private assemblyService: AssemblyService, private overworldService: OverworldService) { }
 
   
   public getDoorset(index: number, palettes: any[]) {
-    this.romService.goTo(this.romService.constants().MAP_DOORS_ADDRESS + (index * 12));
+    this.gbaService.goTo(this.gbaService.constants().MAP_DOORS_ADDRESS + (index * 12));
     let doorset: PokeDoor = new PokeDoor();
-    doorset.blockId = this.romService.getShort();
-    doorset.doorType = this.romService.getShort();
-    let pixelDataAddress = this.romService.getPointer();
-    doorset.paletteIdAddress = this.romService.getPointer();
+    doorset.blockId = this.gbaService.getShort();
+    doorset.doorType = this.gbaService.getShort();
+    let pixelDataAddress = this.gbaService.getPointer();
+    doorset.paletteIdAddress = this.gbaService.getPointer();
 
-    this.romService.goTo(doorset.paletteIdAddress);
-    doorset.paletteId = this.romService.getByte();
+    this.gbaService.goTo(doorset.paletteIdAddress);
+    doorset.paletteId = this.gbaService.getByte();
 
     for (let i = 0; i < 3; i++) {
-      this.romService.goTo(pixelDataAddress + (i * this.romService.constants().MAP_DOOR_PIXEL_LENGTH));
-      doorset.blockPixelData.push(this.romService.getBytes(this.romService.constants().MAP_DOOR_PIXEL_LENGTH));
+      this.gbaService.goTo(pixelDataAddress + (i * this.gbaService.constants().MAP_DOOR_PIXEL_LENGTH));
+      doorset.blockPixelData.push(this.gbaService.getBytes(this.gbaService.constants().MAP_DOOR_PIXEL_LENGTH));
 
-      let bitmapPixels: BitmapPixelData = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, doorset.blockPixelData[i], this.bitmapService, this.romService);
+      let bitmapPixels: BitmapPixelData = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, doorset.blockPixelData[i], this.bitmapService, this.gbaService);
       doorset.blocks.push(this.bitmapService.createBitmap(bitmapPixels, palettes[doorset.paletteId], 16, undefined, true));
     }
     return doorset;
@@ -63,8 +63,8 @@ export class WorldService {
   }
 
   public loadOverlayBaseOAMs() {
-    let startAddress = this.romService.constants().FIELD_OVERLAY_BASE_OAM_ADDRESS;
-    if (this.romService.header.gameCode.startsWith('BPRE')) {
+    let startAddress = this.gbaService.constants().FIELD_OVERLAY_BASE_OAM_ADDRESS;
+    if (this.gbaService.header.gameCode.startsWith('BPRE')) {
       this.overlayBaseOAMs.push({ address: startAddress, width: 8, height: 8 });
       this.overlayBaseOAMs.push({ address: startAddress + 8, width: 16, height: 8 });
       this.overlayBaseOAMs.push({ address: startAddress + 16, width: 16, height: 16 });
@@ -73,7 +73,7 @@ export class WorldService {
       this.overlayBaseOAMs.push({ address: startAddress + 48, width: 16, height: 32 });
       this.overlayBaseOAMs.push({ address: startAddress + 56, width: 32, height: 32 });
       this.overlayBaseOAMs.push({ address: startAddress + 64, width: 64, height: 64 });
-    } else if (this.romService.header.gameCode.startsWith('BPEE')) {
+    } else if (this.gbaService.header.gameCode.startsWith('BPEE')) {
       this.overlayBaseOAMs.push({ address: 0x5094ec, width: 8, height: 8 });
       this.overlayBaseOAMs.push({ address: 0x5094f4, width: 16, height: 8 });
       this.overlayBaseOAMs.push({ address: 0x5094fc, width: 16, height: 16 });
@@ -98,13 +98,13 @@ export class WorldService {
   }
 
   public loadWildMonsterCache() {
-    this.romService.goTo(this.romService.constants().MAP_ENCOUNTER_TABLE);
-    let tablePosition: number = this.romService.getPointer();
+    this.gbaService.goTo(this.gbaService.constants().MAP_ENCOUNTER_TABLE);
+    let tablePosition: number = this.gbaService.getPointer();
 
     let i = 0;
     while (i < 255) { // shouldn't hit 255 due to sentinel but just in case
       let encounterData: MapEncounterData = new MapEncounterData();
-      encounterData.load(this.romService, tablePosition + (i * 20));
+      encounterData.load(this.gbaService, tablePosition + (i * 20));
       if (encounterData.encounterBankId == 3 && encounterData.encounterMapId == 19)
         console.log(encounterData);
       if (encounterData.encounterBankId == 0xFF && encounterData.encounterMapId == 0xFF) 
@@ -137,13 +137,13 @@ export class WorldService {
           start = 4;
         }
 
-        if (this.romService.header.gameCode.startsWith('BPEE') && blockData.backgroundId == 0x10) {
+        if (this.gbaService.header.gameCode.startsWith('BPEE') && blockData.backgroundId == 0x10) {
           if (layerId == 0) {
             end = 8;
           } else {
             end = 0;
           }
-        } else if (this.romService.header.gameCode.startsWith('BPRE') && (blockData.backgroundId == 0x20 || blockData.backgroundId == 0x21)) {
+        } else if (this.gbaService.header.gameCode.startsWith('BPRE') && (blockData.backgroundId == 0x20 || blockData.backgroundId == 0x21)) {
           if (layerId == 0) {
             end = 8;
           } else {
@@ -198,50 +198,50 @@ export class WorldService {
     }
 
     // Map layout
-    this.romService.goTo(worldMap.header.mapDataAddress);
+    this.gbaService.goTo(worldMap.header.mapDataAddress);
     let mapLayout: MapLayout = new MapLayout();
-    mapLayout.load(this.romService);
+    mapLayout.load(this.gbaService);
     worldMap.layout = mapLayout;
 
     // Tilesets
-    this.romService.goTo(worldMap.layout.primaryTilesetAddress);
+    this.gbaService.goTo(worldMap.layout.primaryTilesetAddress);
     let primaryTileset: MapTileset = new MapTileset();
-    primaryTileset.load(this.romService, this.bitmapService);
-    primaryTileset.index = Math.floor((worldMap.layout.primaryTilesetAddress - this.romService.constants().MAP_TILESET_BASE) / 24); // each tileset is 46 bytes
+    primaryTileset.load(this.gbaService, this.bitmapService);
+    primaryTileset.index = Math.floor((worldMap.layout.primaryTilesetAddress - this.gbaService.constants().MAP_TILESET_BASE) / 24); // each tileset is 46 bytes
     worldMap.layout.primaryTileset = primaryTileset;
-    this.romService.goTo(worldMap.layout.secondaryTilesetAddress);
+    this.gbaService.goTo(worldMap.layout.secondaryTilesetAddress);
     let secondaryTileset: MapTileset = new MapTileset();
-    secondaryTileset.load(this.romService, this.bitmapService);
-    secondaryTileset.index = Math.floor((worldMap.layout.secondaryTilesetAddress - this.romService.constants().MAP_TILESET_BASE) / 24); // each tileset is 46 bytes
+    secondaryTileset.load(this.gbaService, this.bitmapService);
+    secondaryTileset.index = Math.floor((worldMap.layout.secondaryTilesetAddress - this.gbaService.constants().MAP_TILESET_BASE) / 24); // each tileset is 46 bytes
     worldMap.layout.secondaryTileset = secondaryTileset;
 
     // Full blocks
-    this.romService.goTo(worldMap.layout.tileDataAddress);
-    worldMap.blockData = new MapBlockData(worldMap.layout.tileDataAddress, worldMap.layout.mapWidth, worldMap.layout.mapHeight, this.romService);
-    worldMap.blockset = new MapBlockset(primaryTileset, secondaryTileset, this.bitmapService, this.romService);
+    this.gbaService.goTo(worldMap.layout.tileDataAddress);
+    worldMap.blockData = new MapBlockData(worldMap.layout.tileDataAddress, worldMap.layout.mapWidth, worldMap.layout.mapHeight, this.gbaService);
+    worldMap.blockset = new MapBlockset(primaryTileset, secondaryTileset, this.bitmapService, this.gbaService);
 
     let index = 0;
     for (let yTile = 0; yTile < worldMap.layout.mapHeight; yTile++) {
       worldMap.blockData.bottomBlocks.push([]);
       worldMap.blockData.topBlocks.push([]);
       for (let xTile = 0; xTile < worldMap.layout.mapWidth; xTile++) {
-        worldMap.blockData.bottomBlocks[yTile].push(worldMap.blockset.getBlock(worldMap.blockData.blockIds[index], this.romService, this.bitmapService));
-        worldMap.blockData.topBlocks[yTile].push(worldMap.blockset.getBlock(worldMap.blockData.blockIds[index], this.romService, this.bitmapService));
+        worldMap.blockData.bottomBlocks[yTile].push(worldMap.blockset.getBlock(worldMap.blockData.blockIds[index], this.gbaService, this.bitmapService));
+        worldMap.blockData.topBlocks[yTile].push(worldMap.blockset.getBlock(worldMap.blockData.blockIds[index], this.gbaService, this.bitmapService));
         index++;
       }
     }
 
     // Entities
-    this.romService.goTo(worldMap.header.eventDataAddress);
-    let entityData: MapEntityData = new MapEntityData(this.romService);
-    entityData.npcCount = this.romService.getByte();
-    entityData.warpCount = this.romService.getByte();
-    entityData.scriptCount = this.romService.getByte();
-    entityData.signCount = this.romService.getByte();
-    entityData.npcAddress = this.romService.getPointer();
-    entityData.warpAddress = this.romService.getPointer();
-    entityData.scriptAddress = this.romService.getPointer();
-    entityData.signAddress = this.romService.getPointer();
+    this.gbaService.goTo(worldMap.header.eventDataAddress);
+    let entityData: MapEntityData = new MapEntityData(this.gbaService);
+    entityData.npcCount = this.gbaService.getByte();
+    entityData.warpCount = this.gbaService.getByte();
+    entityData.scriptCount = this.gbaService.getByte();
+    entityData.signCount = this.gbaService.getByte();
+    entityData.npcAddress = this.gbaService.getPointer();
+    entityData.warpAddress = this.gbaService.getPointer();
+    entityData.scriptAddress = this.gbaService.getPointer();
+    entityData.signAddress = this.gbaService.getPointer();
     entityData.loadEntities();
     for (let i = 0; i < entityData.npcCount; i++) {
       let directionFrame: number = 0;
@@ -292,71 +292,71 @@ export class WorldService {
 
   public async loadBlockCache(map: PokeMap) {
     for (let i = 0; i < 861; i++) {
-      map.blockset.getBlock(i, this.romService, this.bitmapService);
+      map.blockset.getBlock(i, this.gbaService, this.bitmapService);
     }
   }
 
   public loadWorld() {
-    if (this.romService.constants()) {
+    if (this.gbaService.constants()) {
 
-      this.assemblyService.applyTileAnimationAssembly(this.romService.findFreeSpaceAddresses(1548, 1)[0]);
+      this.assemblyService.applyTileAnimationAssembly(this.gbaService.findFreeSpaceAddresses(1548, 1)[0]);
       this.loadOverlayBaseOAMs();
       this.loadFieldOverlays();
       this.loadWildMonsterCache();
 
-      let mapNamesAddress = this.romService.constants().MAP_NAMES_ADDRESS;
-      let mapNamesCount = this.romService.constants().MAP_NAMES_COUNT;
+      let mapNamesAddress = this.gbaService.constants().MAP_NAMES_ADDRESS;
+      let mapNamesCount = this.gbaService.constants().MAP_NAMES_COUNT;
 
-      this.romService.goTo(mapNamesAddress);
-      this.mapNames = this.romService.getGameStringAutoList(mapNamesCount);
+      this.gbaService.goTo(mapNamesAddress);
+      this.mapNames = this.gbaService.getGameStringAutoList(mapNamesCount);
 
-      let bankAddress = this.romService.constants().MAP_BANK_ADDRESS;
-      let bankCount = this.romService.constants().MAP_BANK_COUNT;
-      let bankSizes = this.romService.constants().MAP_BANK_SIZES;
+      let bankAddress = this.gbaService.constants().MAP_BANK_ADDRESS;
+      let bankCount = this.gbaService.constants().MAP_BANK_COUNT;
+      let bankSizes = this.gbaService.constants().MAP_BANK_SIZES;
 
       for (let i = 0; i < bankCount; i++) {
-        this.romService.goTo(bankAddress + (i * 4));
-        let headerAddress = this.romService.getPointer();
+        this.gbaService.goTo(bankAddress + (i * 4));
+        let headerAddress = this.gbaService.getPointer();
         this.maps.push([]);
         for (let j = 0; j < bankSizes[i]; j++) {
-          this.romService.goTo(headerAddress + (j * 4));
-          let mapAddress = this.romService.getPointer();
-          this.romService.goTo(mapAddress);
+          this.gbaService.goTo(headerAddress + (j * 4));
+          let mapAddress = this.gbaService.getPointer();
+          this.gbaService.goTo(mapAddress);
 
           let map: PokeMap = new PokeMap();
           map.bankId = i;
           map.mapId = j;
           let mapHeader: MapHeader = new MapHeader();
-          mapHeader.address = this.romService.position;
-          mapHeader.data = this.romService.getBytes(28);
-          this.romService.goTo(mapHeader.address);
-          mapHeader.mapDataAddress = this.romService.getPointer();
-          mapHeader.eventDataAddress = this.romService.getPointer();
-          mapHeader.mapScriptsAddress = this.romService.getPointer();
-          mapHeader.connectionsAddress = this.romService.getPointer();
-          mapHeader.musicId = this.romService.getShort();
-          mapHeader.mapIndex = this.romService.getShort();
-          mapHeader.labelIndex = this.romService.getByte();
-          mapHeader.visibilityType = this.romService.getByte();
-          mapHeader.weatherType = this.romService.getByte();
-          mapHeader.mapType = this.romService.getByte();
-          this.romService.skip(2);
-          mapHeader.shouldShowLabelOnEntry = this.romService.getByte();
-          mapHeader.battlefieldType = this.romService.getByte();
+          mapHeader.address = this.gbaService.position;
+          mapHeader.data = this.gbaService.getBytes(28);
+          this.gbaService.goTo(mapHeader.address);
+          mapHeader.mapDataAddress = this.gbaService.getPointer();
+          mapHeader.eventDataAddress = this.gbaService.getPointer();
+          mapHeader.mapScriptsAddress = this.gbaService.getPointer();
+          mapHeader.connectionsAddress = this.gbaService.getPointer();
+          mapHeader.musicId = this.gbaService.getShort();
+          mapHeader.mapIndex = this.gbaService.getShort();
+          mapHeader.labelIndex = this.gbaService.getByte();
+          mapHeader.visibilityType = this.gbaService.getByte();
+          mapHeader.weatherType = this.gbaService.getByte();
+          mapHeader.mapType = this.gbaService.getByte();
+          this.gbaService.skip(2);
+          mapHeader.shouldShowLabelOnEntry = this.gbaService.getByte();
+          mapHeader.battlefieldType = this.gbaService.getByte();
           map.header = mapHeader;
 
-          map.label = this.mapNames[mapHeader.labelIndex + this.romService.constants().MAP_NAME_OFFSET];
+          map.label = this.mapNames[mapHeader.labelIndex + this.gbaService.constants().MAP_NAME_OFFSET];
 
           this.maps[i].push(map);
         }
       }
     }
-    this.romService.markToolLoaded();
+    this.gbaService.markToolLoaded();
   }
 
   public loadFieldOverlays() {
-    let fieldMetas: any[] = this.romService.constants().FIELD_OVERLAY_META;
-    let palettes = this.romService.constants().FIELD_OVERLAY_PALETTES;
+    let fieldMetas: any[] = this.gbaService.constants().FIELD_OVERLAY_META;
+    let palettes = this.gbaService.constants().FIELD_OVERLAY_PALETTES;
     for (let i = 0; i < fieldMetas.length; i++) {
       let overlayData = fieldMetas[i];
       this.overlays.push(this.loadFieldOverlay(overlayData.label, overlayData.index, palettes, overlayData.paletteOverrideId));
@@ -365,24 +365,24 @@ export class WorldService {
 
   private loadFieldOverlay(title, id, palettes, paletteOverrideId) {
     let overlay: MapFieldOverlay = new MapFieldOverlay();
-    this.romService.goTo(this.romService.constants().FIELD_OVERLAY_HEADER_ADDRESS + (id * 4))
-    let overlayAddress = this.romService.getPointer();
-    this.romService.goTo(overlayAddress);
+    this.gbaService.goTo(this.gbaService.constants().FIELD_OVERLAY_HEADER_ADDRESS + (id * 4))
+    let overlayAddress = this.gbaService.getPointer();
+    this.gbaService.goTo(overlayAddress);
 
     overlay.address = overlayAddress;
     overlay.title = title;
     overlay.index = id;
-    overlay.tilesTag = this.romService.getShort();
-    overlay.paletteTag = this.romService.getShort();
-    overlay.baseOamAddress = this.romService.getPointer();
+    overlay.tilesTag = this.gbaService.getShort();
+    overlay.paletteTag = this.gbaService.getShort();
+    overlay.baseOamAddress = this.gbaService.getPointer();
     
-    overlay.animationTableAddress = this.romService.getPointer();
-    overlay.framesTableAddress = this.romService.getPointer();
-    this.romService.skip(4); // dummmy?
-    overlay.oamc = this.romService.getPointer(); // dummmy?
+    overlay.animationTableAddress = this.gbaService.getPointer();
+    overlay.framesTableAddress = this.gbaService.getPointer();
+    this.gbaService.skip(4); // dummmy?
+    overlay.oamc = this.gbaService.getPointer(); // dummmy?
 
-    this.romService.goTo(overlay.framesTableAddress);
-    overlay.imageAddress = this.romService.getPointer();
+    this.gbaService.goTo(overlay.framesTableAddress);
+    overlay.imageAddress = this.gbaService.getPointer();
     
     let paletteAddress: number = palettes[0].address; // default
     for (let i = 0; i < palettes.length; i++) {
@@ -399,7 +399,7 @@ export class WorldService {
 
     // paletteOverrideId = reserved overworld palette id assigned (in the game) using C/ASM
     if (!paletteOverrideId) 
-      paletteData = new BitmapPalette(paletteAddress, 16, undefined, undefined, this.bitmapService, this.romService, overlay.paletteTag);
+      paletteData = new BitmapPalette(paletteAddress, 16, undefined, undefined, this.bitmapService, this.gbaService, overlay.paletteTag);
     else
       paletteData = this.overworldService.overworldPalettes[paletteOverrideId];
 
@@ -420,19 +420,19 @@ export class WorldService {
     overlay.animationCount = 0;
     // 32 animations max used for safety, should break beforehand from sentinel
     for (let i = 0; i < 32; i++) {
-      this.romService.goTo(overlay.animationTableAddress + (i * 4));
-      let potentialPointer: number = this.romService.getInt();
-      if (this.romService.isValidPointer(potentialPointer))
-        this.romService.goTo(this.romService.position - 4);
+      this.gbaService.goTo(overlay.animationTableAddress + (i * 4));
+      let potentialPointer: number = this.gbaService.getInt();
+      if (this.gbaService.isValidPointer(potentialPointer))
+        this.gbaService.goTo(this.gbaService.position - 4);
       else
         break;
 
-      let currentAnimationAddress: number = this.romService.getPointer();
+      let currentAnimationAddress: number = this.gbaService.getPointer();
       // 32 frames max used for safety, should break beforehand from sentinel
       for (let j = 0; j < 32; j++) {
-        this.romService.goTo(currentAnimationAddress + (j * 4));
+        this.gbaService.goTo(currentAnimationAddress + (j * 4));
         
-        let frameId: number = this.romService.getShort();
+        let frameId: number = this.gbaService.getShort();
         if (frameId == 0xFFFF)
           break;
 
@@ -443,19 +443,19 @@ export class WorldService {
 
     // sentinel usually hits before frameCount
     for (let j = 0; j < overlay.frameCount; j++) {
-      this.romService.goTo(overlay.framesTableAddress + (j * 8));
-      let potentialPointer: number = this.romService.getInt();
-      if (this.romService.isValidPointer(potentialPointer))
-        this.romService.goTo(this.romService.position - 4);
+      this.gbaService.goTo(overlay.framesTableAddress + (j * 8));
+      let potentialPointer: number = this.gbaService.getInt();
+      if (this.gbaService.isValidPointer(potentialPointer))
+        this.gbaService.goTo(this.gbaService.position - 4);
       else
         break;
         
-      let bitmapAddress: number = this.romService.getPointer();
-      let dataLength: number = this.romService.getShort();
+      let bitmapAddress: number = this.gbaService.getPointer();
+      let dataLength: number = this.gbaService.getShort();
 
-      this.romService.goTo(bitmapAddress);
-      let framePixelValues: number[] = this.romService.getBytes(dataLength);
-      let framePixels: BitmapPixelData = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, framePixelValues, this.bitmapService, this.romService);
+      this.gbaService.goTo(bitmapAddress);
+      let framePixelValues: number[] = this.gbaService.getBytes(dataLength);
+      let framePixels: BitmapPixelData = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, framePixelValues, this.bitmapService, this.gbaService);
       let frameCanvas: HTMLCanvasElement = this.bitmapService.createBitmapCanvas(framePixels, paletteData, overlay.frameWidth, overlay.frameHeight, true);
       overlay.frames.push(frameCanvas);
     }
@@ -468,20 +468,20 @@ export class WorldService {
     overlay.animationCount = 0;
     // 32 animations max used for safety, should break beforehand from sentinel
     for (let i = 0; i < 32; i++) {
-      this.romService.goTo(overlay.animationTableAddress + (i * 4));
-      let potentialPointer: number = this.romService.getInt();
-      if (this.romService.isValidPointer(potentialPointer))
-        this.romService.goTo(this.romService.position - 4);
+      this.gbaService.goTo(overlay.animationTableAddress + (i * 4));
+      let potentialPointer: number = this.gbaService.getInt();
+      if (this.gbaService.isValidPointer(potentialPointer))
+        this.gbaService.goTo(this.gbaService.position - 4);
       else
         break;
 
-      let currentAnimationAddress: number = this.romService.getPointer();
+      let currentAnimationAddress: number = this.gbaService.getPointer();
       let currentAnimationFrames: any[] = [];
       
       // 32 frames max used for safety, should break beforehand from sentinel
       for (let j = 0; j < 32; j++) {
-        this.romService.goTo(currentAnimationAddress + (j * 4));
-        let frameId: number = this.romService.getShort();
+        this.gbaService.goTo(currentAnimationAddress + (j * 4));
+        let frameId: number = this.gbaService.getShort();
 
         if (frameId == 0xFFFF || frameId > overlay.frames.length)
           break;

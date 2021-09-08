@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BitmapAnimation, BitmapPalette, BitmapPixelData, BitmapPixelDepth, BitmapService } from './bitmap.service';
-import { RomService } from './rom.service';
+import { GbaService } from './rom.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +14,10 @@ export class MonsterService {
 
   public isLoaded: boolean = false;
 
-  constructor(private romService: RomService, private bitmapService: BitmapService) { }
+  constructor(private gbaService: GbaService, private bitmapService: BitmapService) { }
 
   public loadMonsters() {
-    this.monsters = new Array(this.romService.constants().MONSTER_COUNT);
+    this.monsters = new Array(this.gbaService.constants().MONSTER_COUNT);
 
     this.loadNames();
     this.loadBaseStats();
@@ -26,27 +26,27 @@ export class MonsterService {
     this.loadMonsterIcons();
 
     this.isLoaded = true;
-    this.romService.markToolLoaded();
+    this.gbaService.markToolLoaded();
   }
 
   private loadMonsterIcons() {
     let monsterIconPalettes: BitmapPalette[] = [];
-    for (let i = 0; i < this.romService.constants().MONSTER_COUNT; i++) {
-      this.romService.goTo(this.romService.constants().MONSTER_ICON_PIXEL_ADDRESS + (i * 4));
-      this.romService.goTo(this.romService.getPointer());
-      let frame0Values = this.romService.getBytes(32 * 32 / 2);
-      let frame1Values = this.romService.getBytes(32 * 32 / 2);
-      let frame0Data = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, frame0Values, this.bitmapService, this.romService);
-      let frame1Data = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, frame1Values, this.bitmapService, this.romService);
+    for (let i = 0; i < this.gbaService.constants().MONSTER_COUNT; i++) {
+      this.gbaService.goTo(this.gbaService.constants().MONSTER_ICON_PIXEL_ADDRESS + (i * 4));
+      this.gbaService.goTo(this.gbaService.getPointer());
+      let frame0Values = this.gbaService.getBytes(32 * 32 / 2);
+      let frame1Values = this.gbaService.getBytes(32 * 32 / 2);
+      let frame0Data = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, frame0Values, this.bitmapService, this.gbaService);
+      let frame1Data = new BitmapPixelData(undefined, BitmapPixelDepth.BPP_4, frame1Values, this.bitmapService, this.gbaService);
       
-      this.romService.goTo(this.romService.constants().MONSTER_ICON_PALETTE_ADDRESS + i);
-      let paletteId = this.romService.getByte();
+      this.gbaService.goTo(this.gbaService.constants().MONSTER_ICON_PALETTE_ADDRESS + i);
+      let paletteId = this.gbaService.getByte();
 
-      if (monsterIconPalettes.length < this.romService.constants().MONSTER_ICON_PALETTE_COUNT) {
-        for (let j = 0; j < this.romService.constants().MONSTER_ICON_PALETTE_COUNT; j++) {
-          this.romService.goTo(this.romService.constants().MONSTER_ICON_PALETTES + (j * 32));
-          let paletteValues = this.romService.getBytes(32);
-          monsterIconPalettes.push(new BitmapPalette(undefined, 16, paletteValues, undefined, this.bitmapService, this.romService, j));
+      if (monsterIconPalettes.length < this.gbaService.constants().MONSTER_ICON_PALETTE_COUNT) {
+        for (let j = 0; j < this.gbaService.constants().MONSTER_ICON_PALETTE_COUNT; j++) {
+          this.gbaService.goTo(this.gbaService.constants().MONSTER_ICON_PALETTES + (j * 32));
+          let paletteValues = this.gbaService.getBytes(32);
+          monsterIconPalettes.push(new BitmapPalette(undefined, 16, paletteValues, undefined, this.bitmapService, this.gbaService, j));
         }
       }
 
@@ -58,11 +58,11 @@ export class MonsterService {
   }
 
   private loadNames() {
-    this.romService.goTo(this.romService.constants().MONSTER_NAMES_ADDRESS);
-    let monsterNamesAddress: number = this.romService.getPointer();
-    this.romService.goTo(monsterNamesAddress);
-    let names: string[] = this.romService
-      .getGameStringAutoList(this.romService.constants().MONSTER_COUNT);
+    this.gbaService.goTo(this.gbaService.constants().MONSTER_NAMES_ADDRESS);
+    let monsterNamesAddress: number = this.gbaService.getPointer();
+    this.gbaService.goTo(monsterNamesAddress);
+    let names: string[] = this.gbaService
+      .getGameStringAutoList(this.gbaService.constants().MONSTER_COUNT);
     
     for (let i = 0; i < names.length; i++) {
       if (this.monsters[i] == undefined)
@@ -74,39 +74,39 @@ export class MonsterService {
   }
 
   private loadBaseStats() {
-    this.romService.goTo(this.romService.constants().MONSTER_BASE_STATS_ADDRESS);
-    let startPosition: number = this.romService.getPointer();
+    this.gbaService.goTo(this.gbaService.constants().MONSTER_BASE_STATS_ADDRESS);
+    let startPosition: number = this.gbaService.getPointer();
     for (let i = 0; i < this.monsters.length; i++) {
       let baseStats: MonsterBaseStats = new MonsterBaseStats();
 
       baseStats.address = startPosition + (i * 28);
-      this.romService.goTo(baseStats.address);
-      baseStats.data = this.romService.getBytes(28);
+      this.gbaService.goTo(baseStats.address);
+      baseStats.data = this.gbaService.getBytes(28);
 
-      this.romService.goTo(baseStats.address);
-      baseStats.baseHP = this.romService.getByte();
-      baseStats.baseAttack = this.romService.getByte();
-      baseStats.baseDefense = this.romService.getByte();
-      baseStats.baseSpeed = this.romService.getByte();
-      baseStats.baseSpAttack = this.romService.getByte();
-      baseStats.baseSpDefense = this.romService.getByte();
-      baseStats.type1 = this.romService.getByte();
-      baseStats.type2 = this.romService.getByte();
-      baseStats.catchRate = this.romService.getByte();
-      baseStats.baseExpYield = this.romService.getByte();
-      baseStats.effortYield = this.romService.getShort();
-      baseStats.item1 = this.romService.getShort();
-      baseStats.item2 = this.romService.getShort();
-      baseStats.gender = this.romService.getByte();
-      baseStats.eggCycles = this.romService.getByte();
-      baseStats.baseFriendship = this.romService.getByte();
-      baseStats.levelUpType = this.romService.getByte();
-      baseStats.eggGroup1 = this.romService.getByte();
-      baseStats.eggGroup2 = this.romService.getByte();
-      baseStats.ability1 = this.romService.getByte();
-      baseStats.ability2 = this.romService.getByte();
-      baseStats.safariZoneRate = this.romService.getByte();
-      baseStats.colorAndFlip = this.romService.getByte();
+      this.gbaService.goTo(baseStats.address);
+      baseStats.baseHP = this.gbaService.getByte();
+      baseStats.baseAttack = this.gbaService.getByte();
+      baseStats.baseDefense = this.gbaService.getByte();
+      baseStats.baseSpeed = this.gbaService.getByte();
+      baseStats.baseSpAttack = this.gbaService.getByte();
+      baseStats.baseSpDefense = this.gbaService.getByte();
+      baseStats.type1 = this.gbaService.getByte();
+      baseStats.type2 = this.gbaService.getByte();
+      baseStats.catchRate = this.gbaService.getByte();
+      baseStats.baseExpYield = this.gbaService.getByte();
+      baseStats.effortYield = this.gbaService.getShort();
+      baseStats.item1 = this.gbaService.getShort();
+      baseStats.item2 = this.gbaService.getShort();
+      baseStats.gender = this.gbaService.getByte();
+      baseStats.eggCycles = this.gbaService.getByte();
+      baseStats.baseFriendship = this.gbaService.getByte();
+      baseStats.levelUpType = this.gbaService.getByte();
+      baseStats.eggGroup1 = this.gbaService.getByte();
+      baseStats.eggGroup2 = this.gbaService.getByte();
+      baseStats.ability1 = this.gbaService.getByte();
+      baseStats.ability2 = this.gbaService.getByte();
+      baseStats.safariZoneRate = this.gbaService.getByte();
+      baseStats.colorAndFlip = this.gbaService.getByte();
 
       // lol i hated this so much, edit at your own risk
       baseStats.hpYield = ((baseStats.effortYield & ((1 << 2) - 1) & ~(((1 << 0) - 1))) >>> 0);
@@ -121,15 +121,15 @@ export class MonsterService {
   }
 
   public loadAbilityNames() {
-    this.romService.goTo(this.romService.constants().ABILITY_NAMES_ADDRESS);
-    this.abilityNames = this.romService.getGameStringAutoList(this.romService.constants().ABILITY_COUNT);
+    this.gbaService.goTo(this.gbaService.constants().ABILITY_NAMES_ADDRESS);
+    this.abilityNames = this.gbaService.getGameStringAutoList(this.gbaService.constants().ABILITY_COUNT);
   }
 
   public loadMoveNames() {
-    this.romService.goTo(this.romService.constants().MOVE_NAMES_ADDRESS);
-    let moveNamesAddress = this.romService.getPointer();
-    this.romService.goTo(moveNamesAddress);
-    this.moveNames = this.romService.getGameStringAutoList(this.romService.constants().MOVE_COUNT);
+    this.gbaService.goTo(this.gbaService.constants().MOVE_NAMES_ADDRESS);
+    let moveNamesAddress = this.gbaService.getPointer();
+    this.gbaService.goTo(moveNamesAddress);
+    this.moveNames = this.gbaService.getGameStringAutoList(this.gbaService.constants().MOVE_COUNT);
     console.log(this.moveNames);
   }
 
@@ -138,30 +138,30 @@ export class MonsterService {
     let paletteStart = 0;
 
     if (isFront) 
-      pixelStart = this.romService.constants().MONSTER_FRONT_PIXEL_ADDRESS;
+      pixelStart = this.gbaService.constants().MONSTER_FRONT_PIXEL_ADDRESS;
     else
-      pixelStart = this.romService.constants().MONSTER_BACK_PIXEL_ADDRESS;
-    if (this.romService.header.gameCode.startsWith('BPRE')) {
-      this.romService.goTo(pixelStart);
-      pixelStart = this.romService.getPointer();
+      pixelStart = this.gbaService.constants().MONSTER_BACK_PIXEL_ADDRESS;
+    if (this.gbaService.header.gameCode.startsWith('BPRE')) {
+      this.gbaService.goTo(pixelStart);
+      pixelStart = this.gbaService.getPointer();
     }
 
     if (isShiny)
-      paletteStart = this.romService.constants().MONSTER_SHINY_PALETTE_ADDRESS;
+      paletteStart = this.gbaService.constants().MONSTER_SHINY_PALETTE_ADDRESS;
     else
-      paletteStart = this.romService.constants().MONSTER_NORMAL_PALETTE_ADDRESS;
-    if (this.romService.header.gameCode.startsWith('BPRE')) {
-      this.romService.goTo(paletteStart);
-      paletteStart = this.romService.getPointer();
+      paletteStart = this.gbaService.constants().MONSTER_NORMAL_PALETTE_ADDRESS;
+    if (this.gbaService.header.gameCode.startsWith('BPRE')) {
+      this.gbaService.goTo(paletteStart);
+      paletteStart = this.gbaService.getPointer();
     }
 
-    this.romService.goTo(pixelStart + (8 * monsterId));
-    let pixelAddress: number = this.romService.getPointer();
-    this.romService.goTo(paletteStart + (8 * monsterId));
-    let paletteAddress: number = this.romService.getPointer();
+    this.gbaService.goTo(pixelStart + (8 * monsterId));
+    let pixelAddress: number = this.gbaService.getPointer();
+    this.gbaService.goTo(paletteStart + (8 * monsterId));
+    let paletteAddress: number = this.gbaService.getPointer();
 
-    let pixelObj: BitmapPixelData = new BitmapPixelData(pixelAddress, BitmapPixelDepth.BPP_4, undefined, this.bitmapService, this.romService);
-    let paletteObj: BitmapPalette = new BitmapPalette(paletteAddress, 16, undefined, undefined, this.bitmapService, this.romService);
+    let pixelObj: BitmapPixelData = new BitmapPixelData(pixelAddress, BitmapPixelDepth.BPP_4, undefined, this.bitmapService, this.gbaService);
+    let paletteObj: BitmapPalette = new BitmapPalette(paletteAddress, 16, undefined, undefined, this.bitmapService, this.gbaService);
 
     return this.bitmapService.createBitmap(pixelObj, paletteObj, 64, 64);
   }

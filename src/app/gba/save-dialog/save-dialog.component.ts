@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { CharacterSetService } from 'src/app/gba/services/character-set.service';
-import { PendingChange, RomService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
 
 @Component({
   selector: 'app-save-dialog',
@@ -10,14 +10,14 @@ import { PendingChange, RomService } from 'src/app/gba/services/rom.service';
 })
 export class SaveDialogComponent implements OnInit {
 
-  constructor(private dialog: MatDialog, public romService: RomService,
+  constructor(private dialog: MatDialog, public gbaService: GbaService,
     public characterSetService: CharacterSetService) { }
 
   ngOnInit(): void {
   }
 
   public save() {
-    this.romService.save();
+    this.gbaService.save();
     this.close();
   }
 
@@ -26,9 +26,9 @@ export class SaveDialogComponent implements OnInit {
   }
 
   public undoChange(change: PendingChange) {
-    this.romService.pendingChanges.delete(change.key);
+    this.gbaService.pendingChanges.delete(change.key);
 
-    if (this.romService.pendingChanges.size == 0) {
+    if (this.gbaService.pendingChanges.size == 0) {
       this.close();
     }
   }

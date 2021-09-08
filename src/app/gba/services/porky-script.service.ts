@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CharacterSetService } from './character-set.service';
 import { PorkyScriptCommandTemplate, PorkyScriptConstants } from './porky-script-constants';
-import { RomService } from './rom.service';
+import { GbaService } from './rom.service';
 import * as _ from 'lodash-es';
 
 
@@ -16,7 +16,7 @@ export class PorkyScriptService {
 
   public constants: PorkyScriptConstants = new PorkyScriptConstants();
 
-  constructor(private romService: RomService, private characterSetService: CharacterSetService) { }
+  constructor(private gbaService: GbaService, private characterSetService: CharacterSetService) { }
 
 
   public decompile(dataAddress: number, existingSecondaryScriptAddresses?: number[]): PorkyScript {
@@ -34,7 +34,7 @@ export class PorkyScriptService {
     while (!isCompletelyDone) {
       currentAddress++;
 
-      let commandValue = this.romService.getByteAt(currentAddress);
+      let commandValue = this.gbaService.getByteAt(currentAddress);
       let commandTemplate: PorkyScriptCommandTemplate = _.cloneDeep(this.constants.commands.get(commandValue));
       let command: PorkyScriptCommand = new PorkyScriptCommand(commandTemplate);
 
@@ -48,8 +48,8 @@ export class PorkyScriptService {
         let paramLength = commandTemplate.paramLengths[i];
         switch (paramLength) {
           case 1:
-            this.romService.goTo(currentAddress + paramOffset);
-            let byteValue: number = this.romService.getByte();
+            this.gbaService.goTo(currentAddress + paramOffset);
+            let byteValue: number = this.gbaService.getByte();
 
             if (commandTemplate.label == 'trainerbattle') {
               if (byteValue == 0 || byteValue == 5) {
@@ -62,15 +62,15 @@ export class PorkyScriptService {
             paramOffset += 1;
             break;
           case 2:
-            this.romService.goTo(currentAddress + paramOffset);
-            let shortValue: number = this.romService.getShort();
+            this.gbaService.goTo(currentAddress + paramOffset);
+            let shortValue: number = this.gbaService.getShort();
 
             command.paramValues.push(shortValue);
             paramOffset += 2;
             break;
           case 4:
-            this.romService.goTo(currentAddress + paramOffset);
-            let addressValue = this.romService.getPointer();
+            this.gbaService.goTo(currentAddress + paramOffset);
+            let addressValue = this.gbaService.getPointer();
             
             if (!existingSecondaryScriptAddresses)
               existingSecondaryScriptAddresses = [];
@@ -83,7 +83,7 @@ export class PorkyScriptService {
 
             // text call
             if (!script.textAddresses.includes(addressValue) && ((commandTemplate.label == 'loadpointer' 
-              && this.romService.getByte() == this.getCommand('callstd').index || commandTemplate.label == 'preparemsg') && !script.textAddresses.includes(addressValue)))
+              && this.gbaService.getByte() == this.getCommand('callstd').index || commandTemplate.label == 'preparemsg') && !script.textAddresses.includes(addressValue)))
               script.textAddresses.push(addressValue);
 
             // movement call
@@ -124,15 +124,15 @@ export class PorkyScriptService {
       }
     }
     for (let i = 0; i < script.textAddresses.length; i++) {
-      this.romService.goTo(script.textAddresses[i]);
-      let scriptText: PorkyScriptText = new PorkyScriptText(script.textAddresses[i], this.romService.getGameStringAutoList(1)[0])
+      this.gbaService.goTo(script.textAddresses[i]);
+      let scriptText: PorkyScriptText = new PorkyScriptText(script.textAddresses[i], this.gbaService.getGameStringAutoList(1)[0])
       script.texts.push(scriptText);
     }
     for (let i = 0; i < script.movementAddresses.length; i++) {
-      this.romService.goTo(script.movementAddresses[i]);
+      this.gbaService.goTo(script.movementAddresses[i]);
       let movements: number[] = [];
       while (movements[movements.length - 1] !== 0xFE) { // 0xFE is sentinel for end of movements
-        movements.push(this.romService.getByte());
+        movements.push(this.gbaService.getByte());
       }
 
       let scriptMovement: PorkyScriptMovement = new PorkyScriptMovement(script.movementAddresses[i], movements)

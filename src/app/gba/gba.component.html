@@ -8,13 +8,13 @@
     </div>
     <div class="w-100">
         <div class="float-right d-inline-flex align-items-center">
-            <div *ngIf="romService.isLoaded()" class="poke-header-line mr-3">
-                <p class="mb-0">{{ romService.header.title }}</p>
-                <p class="mb-0">{{ romService.header.gameCode }} v1.{{ romService.header.version }}</p>
+            <div *ngIf="gbaService.isLoaded()" class="poke-header-line mr-3">
+                <p class="mb-0">{{ gbaService.header.title }}</p>
+                <p class="mb-0">{{ gbaService.header.gameCode }} v1.{{ gbaService.header.version }}</p>
             </div>
 
-            <button *ngIf="romService.pendingChanges.size > 0" mat-raised-button type="button" color="primary" (click)="saveChanges()">Save Changes</button>
-            <button *ngIf="romService.pendingChanges.size == 0" mat-raised-button type="button" color="primary" disabled>No Changes</button>
+            <button *ngIf="gbaService.pendingChanges.size > 0" mat-raised-button type="button" color="primary" (click)="saveChanges()">Save Changes</button>
+            <button *ngIf="gbaService.pendingChanges.size == 0" mat-raised-button type="button" color="primary" disabled>No Changes</button>
         </div>
     </div>
 </div>

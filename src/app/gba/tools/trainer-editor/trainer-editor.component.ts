@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CharacterSetService } from 'src/app/gba/services/character-set.service';
 import { ItemService } from 'src/app/gba/services/item.service';
 import { MonsterService } from 'src/app/gba/services/monster.service';
-import { PendingChange, RomService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
 import { PokeTrainer, TrainerService } from 'src/app/gba/services/trainer.service';
 
 @Component({
@@ -22,16 +22,16 @@ export class TrainerEditorComponent implements OnInit {
   public selectedPartyMonsterId: number = 0;
   public selectedPartyMonster: any;
 
-  constructor(public romService: RomService, public trainerService: TrainerService,
+  constructor(public gbaService: GbaService, public trainerService: TrainerService,
     public itemService: ItemService, public monsterService: MonsterService,
     private characterSetService: CharacterSetService) { }
 
   ngOnInit(): void {
-    if (this.romService.isLoaded()) {
+    if (this.gbaService.isLoaded()) {
       this.loadTrainers();
     }
 
-    this.romService.romLoaded.subscribe(() => {
+    this.gbaService.romLoaded.subscribe(() => {
       this.loadTrainers();
     });
 
@@ -41,7 +41,7 @@ export class TrainerEditorComponent implements OnInit {
   }
 
   private async loadTrainers() {
-    this.trainerSpriteCount = this.romService.constants().TRAINER_SPRITE_COUNT;
+    this.trainerSpriteCount = this.gbaService.constants().TRAINER_SPRITE_COUNT;
 
     // due to lazy load of services, data may not be loaded yet. Load it if not
     if (!this.itemService.items || this.itemService.items.length == 0)
@@ -115,10 +115,10 @@ export class TrainerEditorComponent implements OnInit {
     writeView.setUint8(33, pendingChange.bytesBefore[33]); // unknown
     writeView.setUint8(34, pendingChange.bytesBefore[34]); // unknown
     writeView.setUint8(35, pendingChange.bytesBefore[35]); // unknown
-    writeView.setUint32(36, this.romService.toPointer(this.currentTrainer.partyAddress), true);
+    writeView.setUint32(36, this.gbaService.toPointer(this.currentTrainer.partyAddress), true);
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
   }
 
   public currentPartyMonsterChanged() {
@@ -155,14 +155,14 @@ export class TrainerEditorComponent implements OnInit {
 
     let shouldRepoint: boolean = writeBuffer.byteLength > pendingChange.bytesBefore.length;
     if (shouldRepoint) {
-      pendingChange.repointAddress = this.romService.findFreeSpaceAddresses(writeView.byteLength, 1)[0];
+      pendingChange.repointAddress = this.gbaService.findFreeSpaceAddresses(writeView.byteLength, 1)[0];
       pendingChange.repointAt = [this.currentTrainer.address + 36];
 
       this.currentTrainer.partyAddress = pendingChange.repointAddress;
     }
 
     pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.romService.queueChange(pendingChange);
+    this.gbaService.queueChange(pendingChange);
 
     this.trainerChanged();
   }

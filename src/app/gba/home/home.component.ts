@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
-import { RomService } from 'src/app/gba/services/rom.service';
+import { GbaService } from 'src/app/gba/services/rom.service';
 
 @Component({
   selector: 'app-home',
@@ -19,18 +19,18 @@ export class HomeComponent implements AfterViewInit {
   @ViewChild('trainerTool') public trainerTool: MatTab;
   @ViewChild('itemTool') public itemTool: MatTab;
 
-  constructor(public romService: RomService) { }
+  constructor(public gbaService: GbaService) { }
 
   ngAfterViewInit(): void {
-    this.romService.markLoaded();
+    this.gbaService.markLoaded();
 
     // To avoid ExpressionChangedAfterItHasBeenCheckedError, setTimeout :(
     setTimeout(() => {
-      this.romLoadTime = this.romService.romLoadTime;
+      this.romLoadTime = this.gbaService.romLoadTime;
       this.isLoaded = true;
     });
 
-    this.romService.toolSwitched.subscribe((newTool: any) => {
+    this.gbaService.toolSwitched.subscribe((newTool: any) => {
       this.toolGroup.selectedIndex = this[newTool.tool].position;
     });
   }

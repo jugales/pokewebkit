@@ -282,7 +282,7 @@
                                     <mat-select [(ngModel)]="currentMap.header.labelIndex" (ngModelChange)="metadataChanged()">
                                         <mat-option 
                                             *ngFor="let name of worldService.mapNames; let i = index" 
-                                            [value]="i - romService.constants().MAP_NAME_OFFSET">
+                                            [value]="i - gbaService.constants().MAP_NAME_OFFSET">
                                             {{ i }} - {{ name }}
                                         </mat-option>
                                     </mat-select>
@@ -293,9 +293,9 @@
                                     <mat-label>Music</mat-label>
                                     <mat-select [(ngModel)]="currentMap.header.musicId" (ngModelChange)="metadataChanged()">
                                         <mat-option 
-                                            *ngFor="let name of romService.constants().MUSIC_NAMES; let i = index"
-                                            [value]="(i + romService.constants().MUSIC_MODIFIER)">
-                                            {{ (i + romService.constants().MUSIC_MODIFIER) }} - {{ name | uppercase }}
+                                            *ngFor="let name of gbaService.constants().MUSIC_NAMES; let i = index"
+                                            [value]="(i + gbaService.constants().MUSIC_MODIFIER)">
+                                            {{ (i + gbaService.constants().MUSIC_MODIFIER) }} - {{ name | uppercase }}
                                         </mat-option>
                                         
                                     </mat-select>
@@ -705,7 +705,7 @@
                             <mat-option [value]="5">5 - Hidden Item</mat-option>
                             <mat-option [value]="6">6 - Hidden Item</mat-option>
                             <mat-option [value]="7">7 - Hidden Item</mat-option>
-                            <mat-option [value]="8" *ngIf="romService.header.gameCode == 'BPEE'">8 - Secret Base</mat-option>
+                            <mat-option [value]="8" *ngIf="gbaService.header.gameCode == 'BPEE'">8 - Secret Base</mat-option>
                         </mat-select>
                     </mat-form-field> 
 

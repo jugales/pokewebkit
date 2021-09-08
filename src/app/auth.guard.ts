@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { RomService } from './services/rom.service';
+import { RomService } from './gba/services/rom.service';
 
 @Injectable({
   providedIn: 'root'

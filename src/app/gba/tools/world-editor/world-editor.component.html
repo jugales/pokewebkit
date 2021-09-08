@@ -1,0 +1,964 @@
+<div class="d-inline-flex poke-tool-card-inner w-100" *ngIf="worldService.isLoaded">
+    <div class="bg-gray overflow-auto poke-tool-sidenav-container tablet-or-bigger">
+        <div class="poke-tool-sidenav bg-gray">
+            <div *ngFor="let mapData of worldService.maps; let i = index">
+                <div class="poke-tool-sidenav-item noselect">
+                    <div 
+                        (click)="setCurrentBank(mapData)"
+                        class="poke-tool-sidenav-item-inner py-1 border-bottom" 
+                        [ngClass]="currentBank == mapData ? 'poke-tool-sidenav-item-active' : ''"
+                        matRipple>
+                        <span class="poke-border-sm bg-white mx-2 py-0 px-2">{{ i }}</span>
+                        <span class="float-right mr-4">{{ mapData.length + ' Map' + (mapData.length != 1 ? 's' : '') }}</span>
+                    </div>
+                </div>
+                <div *ngIf="currentBank == mapData">
+                    <div *ngFor="let map of mapData; let j = index" class="poke-tool-sidenav-item noselect bg-gray-light">
+                        <div 
+                            (click)="setCurrent(map, i, j)"
+                            class="poke-tool-sidenav-item-inner py-1 border-bottom mr-3"
+                            [ngClass]="currentMap == map ? 'poke-tool-sidenav-item-active' : ''">
+                            <span class="poke-border-sm bg-white mx-2 py-0 px-2">{{ i + '.' + j }}</span>
+                            <span *ngIf="map.label" class="float-right mr-2"><b>{{ map.label }}</b></span>
+                            <span *ngIf="!map.label" class="float-right mr-2"><b><em>Nameless Map</em></b></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-100 h-100 overflow-hidden d-block" *ngIf="currentMap">
+        <div class="w-100 overflow-auto">
+            <div class="w-100 border-bottom px-2 py-1 d-inline-flex align-items-center justify-content-between poke-secondary-header">
+                <div class="d-flex flex-column">
+                    <div class="d-inline-flex align-items-center">
+                        <mat-button-toggle-group #worldTools [(ngModel)]="currentWorldTool" name="mapView" aria-label="Map View" class="mr-2" [style.minWidth]="'360px'">
+                            <mat-button-toggle value="tiles" checked>Tiles</mat-button-toggle>
+                            <mat-button-toggle value="movement">Movement</mat-button-toggle>
+                            <mat-button-toggle value="entities">Entities</mat-button-toggle>
+                            <mat-button-toggle value="encounters">Encounters</mat-button-toggle>
+                            <mat-button-toggle value="behavior">Behavior</mat-button-toggle>
+                            <mat-button-toggle value="metadata">Metadata</mat-button-toggle>
+                        </mat-button-toggle-group>
+                    </div>
+                </div>
+    
+                <div class="d-inline-flex tablet-or-bigger">
+                    <div class="px-2 d-flex flex-column justify-content-center align-items-center">
+                        <div class=" d-inline-flex justify-content-between align-items-center" [style.width]="'128px'" [style.minHeight]="'32px'">
+                            <span class="mb-0"><b>Painting</b></span>
+                            <div [style.width]="'32px'" [style.height]="(16 * 2) + 'px'" class="d-inline-flex" *ngIf="currentWorldTool == 'tiles'">
+                                <img 
+                                    *ngIf="currentPaintBlockCanvas.toDataURL()"
+                                    [src]="currentPaintBlockCanvas.toDataURL()" 
+                                    [style.width]="currentPaintBlockCanvas.width * 2 + 'px'"
+                                    [style.height]="currentPaintBlockCanvas.height * 2 + 'px'"
+                                    class="d-block position-absolute" 
+                                    [style.zIndex]="15" />
+                            </div>
+                            <div [style.width]="'32px'" [style.height]="(16 * 2) + 'px'" class="d-inline-flex" *ngIf="currentWorldTool == 'movement'">
+                                <div 
+                                    [style.backgroundColor]="getMovement(currentMovementId).color"
+                                    [style.width]="currentPaintBlockCanvas.width * 2 + 'px'"
+                                    [style.height]="currentPaintBlockCanvas.height * 2 + 'px'"
+                                    class="d-flex justify-content-center align-items-center position-absolute">
+                                    {{ currentMovementId.toString(16).toUpperCase() }}
+                                </div>
+                            </div>
+                            <div *ngIf="currentWorldTool !== 'tiles' && currentWorldTool !== 'movement'">
+                                N/A
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-100 d-inline-flex overflow-x-auto overflow-y-hidden bg-gray toolset-header-group" [style.height]="'40px'">
+            <div class="d-flex flex-column border-right bg-gray px-2">
+                <div class="d-inline-flex align-items-center" [style.height]="'40px'">
+                    <div class="d-inline-flex justify-content-center align-items-center">
+                        <button mat-stroked-button class="bg-white mr-2" (click)="editBlocks()">Blocks</button>
+                        <button mat-stroked-button class="bg-white" disabled>Region</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex flex-column border-right bg-gray px-2">
+                <div class="d-inline-flex justify-content-center align-items-center" [style.height]="'40px'">
+                    <button mat-stroked-button class="mr-2 bg-white" (click)="editOverlays()">Field</button>
+                    <button mat-stroked-button class="mr-2 bg-white" (click)="editDoors()">Doors</button>
+                    <!-- <button mat-stroked-button class="bg-white" (click)="editAnimations()">Tiles</button> -->
+                </div>
+            </div>
+            
+            <div class="d-flex flex-column border-right bg-gray px-2">
+                <div class="d-inline-flex justify-content-center align-items-center" [style.height]="'40px'">
+                    <mat-checkbox [(ngModel)]="isShowingOverworlds" class="mb-0">Overworlds</mat-checkbox>
+                    <mat-checkbox [(ngModel)]="isAnimatingTiles" (ngModelChange)="setTileAnimationState()" class="mb-0 ml-2">Animations</mat-checkbox>
+                    <button mat-stroked-button class="bg-white ml-2" (click)="changeZoom()">Zoom: {{ zoom }}x</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row pt-3 px-2 bg-gray" *ngIf="!viewportService.isMedium">
+            <div class="col-6">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Selected Bank</mat-label>
+                    <mat-select [(ngModel)]="currentBank" (ngModelChange)="setCurrentBank(currentBank, true)">
+                        <mat-option 
+                            *ngFor="let bank of worldService.maps; let i = index"
+                            [value]="bank">{{ i }}</mat-option>
+                    </mat-select>
+                </mat-form-field> 
+            </div>
+            <div class="col-6">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Selected Map</mat-label>
+                    <mat-select [(ngModel)]="currentMap" (ngModelChange)="setCurrent(currentMap)">
+                        <mat-option 
+                            *ngFor="let map of currentBank; let j = index"
+                            [value]="map">
+                            <span>{{ j + ' - ' }}</span>
+                            <span *ngIf="map.label" class="float-right mr-2"><b>{{ map.label }}</b></span>
+                            <span *ngIf="!map.label" class="float-right mr-2"><b><em>Nameless Map</em></b></span>
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field> 
+            </div>
+        </div>
+        
+        <div class="d-inline-flex w-100" [ngClass]="!viewportService.isMedium ? 'overflow-auto' : ''">
+            <div 
+                class="map-wrapper-{{ (currentWorldTool == 'movement' || currentWorldTool == 'entities' || currentWorldTool == 'encounters' || currentWorldTool == 'behavior' ? '3' : zoom) }}x"
+                [ngClass]="{'w-100': (!viewportService.isMedium && currentWorldTool == 'metadata'), 'poke-tool-sub-sidenav-2x': viewportService.isMedium}">
+
+                <div 
+                    class="w-100 position-relative" 
+                    *ngIf="currentMapCanvas && currentWorldTool !== 'metadata' && currentMap && currentMap.blockset && currentMap.blockset.isLoaded && currentMap.blockData.bottomBlocks && currentMap.blockData.topBlocks && currentMap.layout"
+                    [style.minHeight]="currentMapCanvas.height * zoom + 'px'"
+                    [style.minHeight]="currentMapCanvas.width * zoom + 'px'">
+                    
+                    <img 
+                        *ngIf="currentMapCanvas"
+                        [src]="currentMapCanvas.toDataURL()" 
+                        [style.width]="currentMapCanvas.width * zoom + 'px'"
+                        [style.height]="currentMapCanvas.height * zoom + 'px'"
+                        class="d-block position-absolute" 
+                        [style.zIndex]="15" />
+
+                    <div [style.zIndex]="500" class="position-absolute" *ngIf="currentWorldTool == 'movement'">
+                        <div *ngFor="let row of [].constructor(currentMap.layout.mapHeight); let rowId = index" class="position-absolute">
+                            <div *ngFor="let col of [].constructor(currentMap.layout.mapWidth); let colId = index" class="position-absolute">
+                                <div
+                                    class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                                    [style.backgroundColor]="getMovement(currentMap.blockData.blockMetas[rowId * currentMap.layout.mapWidth + colId]).color"
+                                    [style.width]="16 * zoom + 'px'"
+                                    [style.height]="16 * zoom + 'px'"
+                                    [style.top]="rowId * 16 * zoom + 'px'"
+                                    [style.left]="colId * 16 * zoom + 'px'">
+                                    <span [style.fontWeight]="'500'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">{{ currentMap.blockData.blockMetas[rowId * currentMap.layout.mapWidth + colId].toString(16).toUpperCase() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div [style.zIndex]="550" class="position-absolute" *ngIf="currentWorldTool == 'entities'">
+                        <div *ngFor="let npc of currentMap.entityData.npcs; let i = index">
+                            <div
+                                class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                                [style.backgroundColor]="!isShowingOverworlds ? '#ffa825ce' : ''"
+                                [style.width]="16 * zoom + 'px'"
+                                [style.height]="16 * zoom + 'px'"
+                                [style.top]="npc.yPosition * 16 * zoom + 'px'"
+                                [style.left]="npc.xPosition * 16 * zoom + 'px'"
+                                [ngClass]="npc == currentNPC && currentEntityType == 'NPC' ? 'block-selected' : ''"
+                                (click)="setCurrentEntity(i, 'NPC')">
+                                <span *ngIf="!isShowingOverworlds" [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">P</span>
+                            </div>
+                        </div>
+
+                        <div *ngFor="let sign of currentMap.entityData.signs; let i = index">
+                            <div
+                                class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                                [style.backgroundColor]="'#0fa500b3'"
+                                [style.width]="16 * zoom + 'px'"
+                                [style.height]="16 * zoom + 'px'"
+                                [style.top]="sign.yPosition * 16 * zoom + 'px'"
+                                [style.left]="sign.xPosition * 16 * zoom + 'px'"
+                                [ngClass]="sign == currentSign && currentEntityType == 'SIGN' ? 'block-selected' : ''"
+                                (click)="setCurrentEntity(i, 'SIGN')">
+                                <span [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">SI</span>
+                            </div>
+                        </div>
+
+                        <div *ngFor="let warp of currentMap.entityData.warps; let i = index">
+                            <div
+                                class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                                [style.backgroundColor]="'#5900ff70'"
+                                [style.width]="16 * zoom + 'px'"
+                                [style.height]="16 * zoom + 'px'"
+                                [style.top]="warp.yPosition * 16 * zoom + 'px'"
+                                [style.left]="warp.xPosition * 16 * zoom + 'px'"
+                                [ngClass]="warp == currentWarp && currentEntityType == 'WARP' ? 'block-selected' : ''"
+                                (click)="setCurrentEntity(i, 'WARP')">
+                                <span [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">W</span>
+                            </div>
+                        </div>
+
+                        <div *ngFor="let script of currentMap.entityData.scripts; let i = index">
+                            <div
+                                class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                                [style.backgroundColor]="'#ff25c896'"
+                                [style.width]="16 * zoom + 'px'"
+                                [style.height]="16 * zoom + 'px'"
+                                [style.top]="script.yPosition * 16 * zoom + 'px'"
+                                [style.left]="script.xPosition * 16 * zoom + 'px'"
+                                [ngClass]="script == currentScript && currentEntityType == 'SCRIPT' ? 'block-selected' : ''"
+                                (click)="setCurrentEntity(i, 'SCRIPT')">
+                                <span [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">S</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div [style.zIndex]="500" class="position-absolute" *ngIf="currentWorldTool == 'encounters'">
+                        <div *ngFor="let row of [].constructor(currentMap.layout.mapHeight); let rowId = index" class="position-absolute">
+                            <div *ngFor="let col of [].constructor(currentMap.layout.mapWidth); let colId = index" class="position-absolute">
+                                <div
+                                    class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                                    [style.backgroundColor]="!isEncounterBlock(currentMap.blockData.blockIds[rowId * currentMap.layout.mapWidth + colId]) ? 'rgba(0, 0, 0, 0.6)' : ''"
+                                    [style.width]="16 * zoom + 'px'"
+                                    [style.height]="16 * zoom + 'px'"
+                                    [style.top]="rowId * 16 * zoom + 'px'"
+                                    [style.left]="colId * 16 * zoom + 'px'">
+                                    <span [style.fontWeight]="'500'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div [style.zIndex]="500" class="position-absolute" *ngIf="currentWorldTool == 'behavior'">
+                        <div *ngFor="let row of [].constructor(currentMap.layout.mapHeight); let rowId = index" class="position-absolute">
+                            <div *ngFor="let col of [].constructor(currentMap.layout.mapWidth); let colId = index" class="position-absolute">
+                                <div
+                                    class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                                    [style.backgroundColor]="!isBehaviorBlock(currentMap.blockData.blockIds[rowId * currentMap.layout.mapWidth + colId]) ? 'rgba(0, 0, 0, 0.6)' : ''"
+                                    [style.width]="16 * zoom + 'px'"
+                                    [style.height]="16 * zoom + 'px'"
+                                    [style.top]="rowId * 16 * zoom + 'px'"
+                                    [style.left]="colId * 16 * zoom + 'px'">
+                                    <span [style.fontWeight]="'500'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div [style.zIndex]="500" class="position-absolute">
+                        <div *ngFor="let row of [].constructor(currentMap.layout.mapHeight); let rowId = index" class="position-absolute">
+                            <div *ngFor="let col of [].constructor(currentMap.layout.mapWidth); let colId = index" class="position-absolute">
+                                <div
+                                    class="block-hover position-absolute"
+                                    [style.width]="16 * zoom + 'px'"
+                                    [style.height]="16 * zoom + 'px'"
+                                    [style.top]="rowId * 16 * zoom + 'px'"
+                                    [style.left]="colId * 16 * zoom + 'px'"
+                                    (mouseover)="mouseOverBlock(colId, rowId)"
+                                    (mousedown)="blockClicked(colId, rowId)"
+                                    (mouseup)="isMouseDown = false">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="currentWorldTool == 'metadata'" class="w-100">
+                    <div class="m-4 px-4 py-3 border">
+                        <h3 class="mb-4"><b>Map Header</b></h3>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Name</mat-label>
+                                    <mat-select [(ngModel)]="currentMap.header.labelIndex" (ngModelChange)="metadataChanged()">
+                                        <mat-option 
+                                            *ngFor="let name of worldService.mapNames; let i = index" 
+                                            [value]="i - romService.constants().MAP_NAME_OFFSET">
+                                            {{ i }} - {{ name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field> 
+                            </div>
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Music</mat-label>
+                                    <mat-select [(ngModel)]="currentMap.header.musicId" (ngModelChange)="metadataChanged()">
+                                        <mat-option 
+                                            *ngFor="let name of romService.constants().MUSIC_NAMES; let i = index"
+                                            [value]="(i + romService.constants().MUSIC_MODIFIER)">
+                                            {{ (i + romService.constants().MUSIC_MODIFIER) }} - {{ name | uppercase }}
+                                        </mat-option>
+                                        
+                                    </mat-select>
+                                </mat-form-field> 
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Visibility</mat-label>
+                                    <mat-select [(ngModel)]="currentMap.header.visibilityType" (ngModelChange)="metadataChanged()">
+                                        <mat-option [value]="0">0 - Regular</mat-option>
+                                        <mat-option [value]="1">1 - Dark, Flash Usable</mat-option>
+                                        <mat-option [value]="2">2 - Dark, Flash Unusable</mat-option>
+                                        <mat-option [value]="3">3 - ???</mat-option>
+                                        <mat-option [value]="4">4 - ???</mat-option>
+                                        <mat-option [value]="5">5 - ???</mat-option>
+                                        <mat-option [value]="6">6 - ???</mat-option>
+                                        <mat-option [value]="7">7 - ???</mat-option>
+                                        <mat-option [value]="8">8 - ???</mat-option>
+                                        <mat-option [value]="9">9 - ???</mat-option>
+                                        <mat-option [value]="10">10 - ???</mat-option>
+                                        <mat-option [value]="11">11 - ???</mat-option>
+                                        <mat-option [value]="12">12 - ???</mat-option>
+                                        <mat-option [value]="13">13 - ???</mat-option>
+                                        <mat-option [value]="14">14 - ???</mat-option>
+                                        <mat-option [value]="15">15 - ???</mat-option>
+                                    </mat-select>
+                                </mat-form-field> 
+                            </div>
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Weather</mat-label>
+                                    <mat-select [(ngModel)]="currentMap.header.weatherType" (ngModelChange)="metadataChanged()">
+                                        <mat-option [value]="0">0 - Inside a Building</mat-option>
+                                        <mat-option [value]="1">1 - Sunny, Clouds in Water</mat-option>
+                                        <mat-option [value]="2">2 - Normal</mat-option>
+                                        <mat-option [value]="3">3 - Rainy</mat-option>
+                                        <mat-option [value]="4">4 - Three Snow Flakes</mat-option>
+                                        <mat-option [value]="5">5 - Thunderstorm</mat-option>
+                                        <mat-option [value]="6">6 - Steady Mist</mat-option>
+                                        <mat-option [value]="7">7 - Steady Snow</mat-option>
+                                        <mat-option [value]="8">8 - Sandstorm</mat-option>
+                                        <mat-option [value]="9">9 - Fading Mist</mat-option>
+                                        <mat-option [value]="10">10 - Dense Mist</mat-option>
+                                        <mat-option [value]="11">11 - Cloudy</mat-option>
+                                        <mat-option [value]="12">12 - Underground Flash</mat-option>
+                                        <mat-option [value]="13">13 - Heavy Thunderstorm</mat-option>
+                                        <mat-option [value]="14">14 - Underwater Mist</mat-option>
+                                        <mat-option [value]="15">15 - ???</mat-option>
+                                    </mat-select>
+                                </mat-form-field> 
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Map Type</mat-label>
+                                    <mat-select [(ngModel)]="currentMap.header.mapType" (ngModelChange)="metadataChanged()">
+                                        <mat-option [value]="0">0 - ???</mat-option>
+                                        <mat-option [value]="1">1 - Village</mat-option>
+                                        <mat-option [value]="2">2 - City</mat-option>
+                                        <mat-option [value]="3">3 - Route</mat-option>
+                                        <mat-option [value]="4">4 - Underground</mat-option>
+                                        <mat-option [value]="5">5 - Underwater</mat-option>
+                                        <mat-option [value]="6">6 - ???</mat-option>
+                                        <mat-option [value]="7">7 - ???</mat-option>
+                                        <mat-option [value]="8">8 - Inside a Building</mat-option>
+                                        <mat-option [value]="9">9 - Inside a Secret Base</mat-option>
+                                        <mat-option [value]="10">10 - ???</mat-option>
+                                        <mat-option [value]="11">11 - ???</mat-option>
+                                        <mat-option [value]="12">12 - ???</mat-option>
+                                        <mat-option [value]="13">13 - ???</mat-option>
+                                        <mat-option [value]="14">14 - ???</mat-option>
+                                        <mat-option [value]="15">15 - ???</mat-option>
+                                    </mat-select>
+                                </mat-form-field> 
+                            </div>
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Battle Style</mat-label>
+                                    <mat-select [(ngModel)]="currentMap.header.battlefieldType" (ngModelChange)="metadataChanged()">
+                                        <mat-option [value]="0">0 - Random</mat-option>
+                                        <mat-option [value]="1">1 - Gym</mat-option>
+                                        <mat-option [value]="2">2 - Evil Team</mat-option>
+                                        <mat-option [value]="3">3 - ???</mat-option>
+                                        <mat-option [value]="4">4 - Elite 4</mat-option>
+                                        <mat-option [value]="5">5 - Elite 4</mat-option>
+                                        <mat-option [value]="6">6 - Elite 4</mat-option>
+                                        <mat-option [value]="7">7 - Elite 4</mat-option>
+                                        <mat-option [value]="8">8 - Pokéball</mat-option>
+                                        <mat-option [value]="9">9 - ???</mat-option>
+                                        <mat-option [value]="10">10 - ???</mat-option>
+                                        <mat-option [value]="11">11 - ???</mat-option>
+                                        <mat-option [value]="12">12 - ???</mat-option>
+                                        <mat-option [value]="13">13 - ???</mat-option>
+                                        <mat-option [value]="14">14 - ???</mat-option>
+                                        <mat-option [value]="15">15 - ???</mat-option>
+                                    </mat-select>
+                                </mat-form-field> 
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="m-4 px-4 py-3 border">
+                        <h3 class="mb-4"><b>Map Layout</b></h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Primary Tileset</mat-label>
+                                    <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentMap.layout.primaryTileset.index" >
+                                    <mat-hint>Not yet editable</mat-hint>
+                                </mat-form-field> 
+                            </div>
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Secondary Tileset</mat-label>
+                                    <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentMap.layout.secondaryTileset.index">
+                                    <mat-hint>Not yet editable</mat-hint>
+                                </mat-form-field> 
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Width</mat-label>
+                                    <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentMap.layout.mapWidth" (ngModelChange)="metadataChanged()">
+                                    <mat-hint>0-255</mat-hint>
+                                </mat-form-field> 
+                            </div>
+                            <div class="col-md-6">
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Height</mat-label>
+                                    <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentMap.layout.mapHeight" (ngModelChange)="metadataChanged()">
+                                    <mat-hint>0-255</mat-hint>
+                                </mat-form-field> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="map-sidenav blockset-display overflow-auto poke-tool-sub-sidenav-{{ (currentWorldTool == 'movement' || currentWorldTool == 'entities' || currentWorldTool == 'encounters' || currentWorldTool == 'behavior' ? '3' : zoom) }}x border-left" 
+                *ngIf="currentMap && currentMap.blockset && currentWorldTool !== 'metadata'"
+                [style.paddingTop]="!viewportService.isMedium ? ((currentMap.layout.mapHeight * 16 * zoom) + 24 + 'px') : '0px'">
+                <!-- Desktop: Tiles tab right panel -->
+                <div class="position-relative" *ngIf="viewportService.isMedium && currentMap && currentMap.blockset && worldService.isLoaded && currentWorldTool == 'tiles'">
+                    <div class="position-absolute" [style.right]="(0 + (currentBlocksetCanvas.width * zoom)) + 'px'" [style.zIndex]="50">
+                        <img 
+                        *ngIf="currentBlocksetCanvas"
+                        [src]="currentBlocksetCanvas.toDataURL()" 
+                        [style.width]="(currentBlocksetCanvas.width * zoom) + 'px'"
+                        [style.height]="(currentBlocksetCanvas.height * zoom) + 'px'"
+                        class="d-block position-absolute" 
+                        [style.zIndex]="15" />
+                    </div>
+                    <div class="position-absolute" [style.right]="(0 + (currentBlocksetCanvas.width * zoom)) + 'px'">
+                        <div 
+                            *ngFor="let block of [].constructor(861); let i = index" 
+                            (click)="paintBlockSelected(i)"
+                            [style.left]="(i * 16 * zoom) % (16 * zoom * 8) + 'px'" 
+                            [style.top]="floorValue((i * 16 * zoom) / (16 * zoom * 8)) * 16 * zoom + 'px'" 
+                            [style.width]="(16 * zoom) + 'px'" 
+                            [style.height]="(16 * zoom) + 'px'"
+                            [style.zIndex]="250"
+                            class="position-absolute block-hover"
+                            [ngClass]="{ 'block-selected': (i == currentPaintBlockId) }"
+                            matRipple >
+                            
+                        </div>
+                    </div>
+                </div>
+                <!-- Mobile: Tiles tab right panel -->
+                <div class="position-relative" *ngIf="!viewportService.isMedium && currentMap && currentMap.blockset && worldService.isLoaded && currentWorldTool == 'tiles'">
+                    <img 
+                    *ngIf="currentBlocksetCanvas"
+                    [src]="currentBlocksetCanvas.toDataURL()" 
+                    [style.width]="(currentBlocksetCanvas.width * zoom) + 'px'"
+                    [style.height]="(currentBlocksetCanvas.height * zoom) + 'px'"
+                    class="d-block" 
+                    [style.zIndex]="15" />
+                    <div 
+                        *ngFor="let block of [].constructor(861); let i = index" 
+                        (click)="paintBlockSelected(i)"
+                        [style.left]="(i * 16 * zoom) % (16 * zoom * 8) + 'px'" 
+                        [style.top]="floorValue((i * 16 * zoom) / (16 * zoom * 8)) * 16 * zoom + 'px'" 
+                        [style.width]="(16 * zoom) + 'px'" 
+                        [style.height]="(16 * zoom) + 'px'"
+                        [style.zIndex]="250"
+                        class="position-absolute block-hover"
+                        [ngClass]="{ 'block-selected': (i == currentPaintBlockId) }"
+                        matRipple >
+                    </div>
+                </div>
+
+                <!-- Movement tab right panel -->
+                <div class="position-relative" *ngIf="currentMap && currentMap.blockset && worldService.isLoaded && currentWorldTool == 'movement'">
+                    <div *ngFor="let movement of [].constructor(63); let i = index">
+                        <div 
+                            class="d-inline-flex w-100 p-2 border-bottom justify-content-between align-items-center cursor-pointer"
+                            [ngClass]="i == currentMovementId ? 'bg-dark text-white' : 'bg-gray-hover'"
+                            (click)="currentMovementId = i"
+                            matRipple>
+                            <div class="movement-selector-preview" [style.backgroundColor]="getMovement(i).color">{{ i.toString(16).toUpperCase() }}</div>
+                            <div>
+                                <span
+                                    [ngClass]="i == currentMovementId ? 'bg-gray-dark text-white' : 'bg-gray'" 
+                                    class="poke-border-sm py-1 px-2 mr-2" *ngIf="getMovement(i).layer">{{ getMovement(i).layer }}</span>
+                                <span>{{ getMovement(i).title }}</span>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entity tab right panel -->
+                <div class="position-relative p-3" *ngIf="currentMap && currentEntityType == 'NPC' && currentNPC && currentWorldTool == 'entities'">
+                    <p class="mb-3 text-gray">You may edit existing entities. Adding new entities will be available soon.</p>
+                    <div class="poke-border-sm bg-gray p-2 mb-3 w-100 d-inline-flex align-items-center justify-content-between">
+                        <p class="mb-0"><b>NPC Entity</b></p>
+                        <div class="d-inline-flex align-items-center">
+                            <span class="mr-2">{{ currentNPC.uid }}</span>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentNPC.uid == 0 ? 'text-gray' : ''"
+                                (click)="setEntityBackward()">arrow_back</mat-icon>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentNPC.uid == currentMap.entityData.npcs.length - 1 ? 'text-gray' : ''"
+                                (click)="setEntityForward()">arrow_forward</mat-icon>
+                        </div>
+                    </div>
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Local NPC Index</mat-label>
+                        <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentNPC.npcIndex" (ngModelChange)="npcChanged()">
+                        <mat-hint>0-255</mat-hint>
+                    </mat-form-field> 
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Sprite Index</mat-label>
+                        <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentNPC.spriteId" (ngModelChange)="npcSpriteChanged(); npcChanged()">
+                        <mat-hint>0-255</mat-hint>
+                    </mat-form-field> 
+
+                    <div class="row">
+                        <div class="col-6">
+                            <mat-form-field class="w-100 mb-2" appearance="outline">
+                                <mat-label>Map X</mat-label>
+                                <input type="number" min="0" max="{{ currentMap.layout.mapWidth }}" matInput placeholder="0" [(ngModel)]="currentNPC.xPosition" (ngModelChange)="npcChanged()">
+                                <mat-hint>0-{{ currentMap.layout.mapWidth }}</mat-hint>
+                            </mat-form-field> 
+                        </div>
+                        <div class="col-6">
+                            <mat-form-field class="w-100 mb-2" appearance="outline">
+                                <mat-label>Map Y</mat-label>
+                                <input type="number" min="0" max="{{ currentMap.layout.mapHeight }}" matInput placeholder="0" [(ngModel)]="currentNPC.yPosition" (ngModelChange)="npcChanged()">
+                                <mat-hint>0-{{ currentMap.layout.mapHeight }}</mat-hint>
+                            </mat-form-field> 
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <mat-form-field class="w-100 mb-2" appearance="outline">
+                                <mat-label>Movement Type</mat-label>
+                                <mat-select [(ngModel)]="currentNPC.movementType" (ngModelChange)="npcChanged()">
+                                    <mat-option *ngFor="let movementType of movementTypes; let i = index" [value]="i">{{ i }} - {{ movementType | titlecase }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-6">
+                            <mat-form-field class="w-100 mb-2" appearance="outline">
+                                <mat-label>Movement Param</mat-label>
+                                <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentNPC.movementParam" (ngModelChange)="npcChanged()">
+                                <mat-hint>0-255</mat-hint>
+                            </mat-form-field> 
+                        </div>
+                    </div>
+
+                    <div *ngFor="let trainer of currentNPC.trainers; let i = index" class="mb-3 p-2 bg-gray">
+                        <div class="w-100 d-inline-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex flex-column">
+                                <p class="mb-0"><b>{{ trainer.name }}</b></p>
+                                <div class="d-inline-flex">
+                                    <div *ngFor="let monster of trainer.party">
+                                        <img *ngIf="monster.species > 0" [src]="monsterService.monsterIcons[monster.species].currentFrame.toDataURL()" width="32px" height="32px" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <img *ngIf="currentNPC.trainerSprites[i]" [src]="currentNPC.trainerSprites[i]" width="64px" height="64px" />
+                        </div>
+                        <button mat-raised-button type="button" color="primary" class="w-100" (click)="goToTrainer(trainer.uid)">
+                            <span>Go to Trainer #{{ trainer.uid + 1 }}</span>
+                        </button>
+                    </div>
+
+                    <div class="w-100 mb-2 mb-3 d-inline-flex align-items-center">
+                        <mat-checkbox [(ngModel)]="currentNPC.isTrainer" (ngModelChange)="npcChanged()">Use Trainer View Radius</mat-checkbox>
+                    </div>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>View Radius / Berry Index</mat-label>
+                        <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentNPC.viewRadius" (ngModelChange)="npcChanged()">
+                        <mat-hint>Berry index if not marked as trainer</mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Script Address</mat-label>
+                        <input type="text" [value]="currentNPC.scriptAddress.toString(16).toUpperCase()" min="0" max="255" matInput placeholder="0" (change)="currentNPC.scriptAddress = getInputHexValue($event); npcChanged()">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field> 
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Global NPC Index</mat-label>
+                        <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentNPC.personId" (ngModelChange)="npcChanged()">
+                        <mat-hint>Used in scripts</mat-hint>
+                    </mat-form-field> 
+
+                    <p class="mb-1"><b>Data</b></p>
+                    <div class="bg-gray p-2 mb-3" *ngIf="currentNPC && currentNPC.data">
+                        <span *ngFor="let byteValue of currentNPC.data" class="mr-2 mb-1 hex-value"><b>{{ (byteValue.toString(16).length == 1 ? '0' : '') + byteValue.toString(16).toUpperCase() + '  '}}</b></span>
+                    </div>
+
+                    <p class="mb-1"><b>Script</b></p>
+                    <div *ngIf="currentNPC.script"
+                        class="bg-gray p-2 mb-0 overflow-hidden hex-value" >
+                        <div class="w-100 text-nowrap" [innerText]="currentNPC.script" [style.height]="'194px'" [style.maxHeight]="'194px'">
+                            <div class="position-absolute w-100 script-fadeout" [style.bottom]="'0px'" [style.left]="'0px'" [style.height]="'25px'"></div>
+                        </div>
+                    </div>
+                    <div *ngIf="!currentNPC.script"
+                        class="bg-gray p-2 mb-0">
+                        <div class="w-100 overflow-hidden" [style.height]="'194px'" [style.maxHeight]="'194px'">
+                            <p class="mb-1">No Script Found</p>
+                            <p class="mb-0">If you believe this NPC is already associated with a script, you can check:</p>
+                            <ul>
+                                <li>Script entities (pink 'S' on the map)</li>
+                                <li>Map scripts in the Metadata tab</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-gray mb-1" *ngIf="currentNPC.script">Showing {{ currentNPC.script.trim().split('\n').length >= 10 ? '10' : currentNPC.script.trim().split('\n').length }} out of {{ currentNPC.script.trim().split('\n').length }} lines.</p>
+                    <button *ngIf="currentNPC.script" mat-raised-button type="button" color="primary" class="w-100" (click)="editScript()">
+                        <span>Edit Script</span>
+                    </button>
+                </div>
+                <div class="position-relative p-3" *ngIf="currentMap && currentEntityType == 'SIGN' && currentSign && currentWorldTool == 'entities'">
+                    <p class="mb-3 text-gray">You may edit existing entities. Adding new entities will be available soon.</p>
+                    <div class="poke-border-sm bg-gray p-2 mb-3 w-100 d-inline-flex align-items-center justify-content-between">
+                        <p class="mb-0"><b>Sign Entity</b></p>
+                        <div class="d-inline-flex align-items-center">
+                            <span class="mr-2">{{ currentSign.uid }}</span>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentSign.uid == 0 ? 'text-gray' : ''"
+                                (click)="setEntityBackward()">arrow_back</mat-icon>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentSign.uid == currentMap.entityData.signs.length - 1 ? 'text-gray' : ''"
+                                (click)="setEntityForward()">arrow_forward</mat-icon>
+                        </div>
+                    </div>
+
+                    <div class="d-flex-inline justify-content-between">
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Map X</mat-label>
+                            <input type="number" min="0" max="{{ currentMap.layout.mapWidth }}" matInput placeholder="0" [(ngModel)]="currentSign.xPosition" (ngModelChange)="signChanged()">
+                            <mat-hint>0-{{ currentMap.layout.mapWidth }}</mat-hint>
+                        </mat-form-field> 
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Map Y</mat-label>
+                            <input type="number" min="0" max="{{ currentMap.layout.mapHeight }}" matInput placeholder="0" [(ngModel)]="currentSign.yPosition" (ngModelChange)="signChanged()">
+                            <mat-hint>0-{{ currentMap.layout.mapHeight }}</mat-hint>
+                        </mat-form-field> 
+                    </div>
+
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>Movement Layer</mat-label>
+                        <mat-select [(ngModel)]="currentSign.movementLayer" (ngModelChange)="signChanged()">
+                            <mat-option [value]="0">0 - All Layers</mat-option>
+                            <mat-option [value]="1">0 - Surf Only</mat-option>
+                            <mat-option [value]="2">2 - Layer 1</mat-option>
+                            <mat-option [value]="3">3 - Layer 2 (default)</mat-option>
+                            <mat-option [value]="4">4 - Layer 3</mat-option>
+                            <mat-option [value]="5">5 - Layer 4</mat-option>
+                            <mat-option [value]="6">6 - Layer 5</mat-option>
+                            <mat-option [value]="7">7 - Layer 6</mat-option>
+                            <mat-option [value]="8">8 - Layer 7</mat-option>
+                            <mat-option [value]="9">9 - Layer 8</mat-option>
+                            <mat-option [value]="10">10 - Layer 9</mat-option>
+                            <mat-option [value]="11">11 - Layer 10</mat-option>
+                            <mat-option [value]="12">12 - Layer 11</mat-option>
+                            <mat-option [value]="13">13 - Layer 12</mat-option>
+                            <mat-option [value]="14">14 - Layer 13</mat-option>
+                            <mat-option [value]="15">15 - Layer 14</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>Sign Type</mat-label>
+                        <mat-select [(ngModel)]="currentSign.signType" (ngModelChange)="signChanged()">
+                            <mat-option [value]="0">0 - Script</mat-option>
+                            <mat-option [value]="1">1 - Script (when player facing north)</mat-option>
+                            <mat-option [value]="2">2 - Script (when player facing south)</mat-option>
+                            <mat-option [value]="3">3 - Script (when player facing east)</mat-option>
+                            <mat-option [value]="4">4 - Script (when player facing west)</mat-option>
+                            <mat-option [value]="5">5 - Hidden Item</mat-option>
+                            <mat-option [value]="6">6 - Hidden Item</mat-option>
+                            <mat-option [value]="7">7 - Hidden Item</mat-option>
+                            <mat-option [value]="8" *ngIf="romService.header.gameCode == 'BPEE'">8 - Secret Base</mat-option>
+                        </mat-select>
+                    </mat-form-field> 
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline" *ngIf="!(currentSign.signType == 5 || currentSign.signType == 6 || currentSign.signType == 7)">
+                        <mat-label>Script Address</mat-label>
+                        <input type="text" [value]="currentSign.scriptAddress.toString(16).toUpperCase()" min="0" max="255" matInput placeholder="0" (change)="currentSign.scriptAddress = getInputHexValue($event); scriptChanged()">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field>
+
+                    <div class="w-100" *ngIf="currentSign.signType == 5 || currentSign.signType == 6 || currentSign.signType == 7">
+                        <mat-form-field class="w-100" appearance="outline">
+                            <mat-label>Hidden Item</mat-label>
+                            <mat-select [(ngModel)]="currentSign.hiddenItemId" (ngModelChange)="signChanged()">
+                                <mat-option [value]="0">??????????</mat-option>
+                                <mat-option 
+                                    *ngFor="let item of itemService.items; let i = index" 
+                                    [value]="item.uid">
+                                    {{ item.name }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Hidden Item Count</mat-label>
+                            <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentSign.hiddenItemAmount" (ngModelChange)="signChanged()">
+                            <mat-hint>0-255</mat-hint>
+                        </mat-form-field> 
+
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Global Hidden Item Index</mat-label>
+                            <input type="number" min="0" matInput placeholder="0" [(ngModel)]="currentSign.globalHiddenIndex" (ngModelChange)="signChanged()">
+                            <mat-hint>Used for tracking flags</mat-hint>
+                        </mat-form-field> 
+                    </div>
+
+                    <div class="bg-gray p-2 mb-5" *ngIf="currentSign && currentSign.data">
+                        <span *ngFor="let byteValue of currentSign.data" class="mr-2 mb-1 hex-value"><b>{{ (byteValue.toString(16).length == 1 ? '0' : '') + byteValue.toString(16).toUpperCase() + '  '}}</b></span>
+                    </div>
+                    <div *ngIf="!(currentSign.signType == 5 || currentSign.signType == 6 || currentSign.signType == 7)">
+                        <p class="mb-1"><b>Script</b></p>
+                        <div *ngIf="currentSign.script"
+                            class="bg-gray p-2 mb-0 overflow-hidden hex-value" >
+                            <div class="w-100 text-nowrap" [innerText]="currentSign.script" [style.height]="'194px'" [style.maxHeight]="'194px'">
+                                <div class="position-absolute w-100 script-fadeout" [style.bottom]="'0px'" [style.left]="'0px'" [style.height]="'25px'"></div>
+                            </div>
+                        </div>
+                        <div *ngIf="!currentSign.script"
+                            class="bg-gray p-2 mb-0">
+                            <div class="w-100 overflow-hidden" [style.height]="'194px'" [style.maxHeight]="'194px'">
+                                <p class="mb-1">No Script Found</p>
+                            </div>
+                        </div>
+                        <p class="text-gray mb-1" *ngIf="currentSign.script">Showing {{ currentSign.script.trim().split('\n').length >= 10 ? '10' : currentSign.script.trim().split('\n').length }} out of {{ currentSign.script.trim().split('\n').length }} lines.</p>
+                        <button *ngIf="currentSign.script" mat-raised-button type="button" color="primary" class="w-100" (click)="editScript()">
+                            <span>Edit Script</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="position-relative p-3" *ngIf="currentMap && currentEntityType == 'WARP' && currentWarp && currentWorldTool == 'entities'">
+                    <p class="mb-3 text-gray">You may edit existing entities. Adding new entities will be available soon.</p>
+                    <div class="poke-border-sm bg-gray p-2 mb-3 w-100 d-inline-flex align-items-center justify-content-between">
+                        <p class="mb-0"><b>Warp Entity</b></p>
+                        <div class="d-inline-flex align-items-center">
+                            <span class="mr-2">{{ currentWarp.uid }}</span>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentWarp.uid == 0 ? 'text-gray' : ''"
+                                (click)="setEntityBackward()">arrow_back</mat-icon>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentWarp.uid == currentMap.entityData.warps.length - 1 ? 'text-gray' : ''"
+                                (click)="setEntityForward()">arrow_forward</mat-icon>
+                        </div>
+                    </div>
+
+                    <div class="d-flex-inline justify-content-between">
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Map X</mat-label>
+                            <input type="number" min="0" max="{{ currentMap.layout.mapWidth }}" matInput placeholder="0" [(ngModel)]="currentWarp.xPosition" (ngModelChange)="warpChanged()">
+                            <mat-hint>0-{{ currentMap.layout.mapWidth }}</mat-hint>
+                        </mat-form-field> 
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Map Y</mat-label>
+                            <input type="number" min="0" max="{{ currentMap.layout.mapHeight }}" matInput placeholder="0" [(ngModel)]="currentWarp.yPosition" (ngModelChange)="warpChanged()">
+                            <mat-hint>0-{{ currentMap.layout.mapHeight }}</mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Destination Warp</mat-label>
+                        <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentWarp.destinationWarp" (ngModelChange)="warpChanged()">
+                        <mat-hint>0-255</mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Destination Bank</mat-label>
+                        <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentWarp.destinationBank" (ngModelChange)="warpChanged()">
+                        <mat-hint>0-255</mat-hint>
+                    </mat-form-field> 
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Destination Map</mat-label>
+                        <input type="number" min="0" max="255" matInput placeholder="0" [(ngModel)]="currentWarp.destinationMap" (ngModelChange)="warpChanged()">
+                        <mat-hint>0-255</mat-hint>
+                    </mat-form-field> 
+
+                    <button mat-raised-button type="button" color="primary" class="w-100 mb-3" (click)="setCurrent(worldService.getMap(currentWarp.destinationBank, currentWarp.destinationMap), currentWarp.destinationBank, currentWarp.destinationMap)">
+                        <span>Go to Destination Map</span>
+                    </button>
+
+                    <div class="bg-gray p-2" *ngIf="currentWarp && currentWarp.data">
+                        <span *ngFor="let byteValue of currentWarp.data" class="mr-2 mb-1 hex-value"><b>{{ (byteValue.toString(16).length == 1 ? '0' : '') + byteValue.toString(16).toUpperCase() + '  '}}</b></span>
+                    </div>
+                </div>
+                <div class="position-relative p-3" *ngIf="currentMap && currentEntityType == 'SCRIPT' && currentScript && currentWorldTool == 'entities'">
+                    <p class="mb-3 text-gray">You may edit existing entities. Adding new entities will be available soon.</p>
+                    <div class="poke-border-sm bg-gray p-2 mb-3 w-100 d-inline-flex align-items-center justify-content-between">
+                        <p class="mb-0"><b>Script Entity</b></p>
+                        <div class="d-inline-flex align-items-center">
+                            <span class="mr-2">{{ currentScript.uid }}</span>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentScript.uid == 0 ? 'text-gray' : ''"
+                                (click)="setEntityBackward()">arrow_back</mat-icon>
+                            <mat-icon 
+                                class="cursor-pointer" 
+                                [ngClass]="currentScript.uid == currentMap.entityData.scripts.length - 1 ? 'text-gray' : ''"
+                                (click)="setEntityForward()">arrow_forward</mat-icon>
+                        </div>
+                    </div>
+
+                    <div class="d-flex-inline justify-content-between">
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Map X</mat-label>
+                            <input type="number" min="0" max="{{ currentMap.layout.mapWidth }}" matInput placeholder="0" [(ngModel)]="currentScript.xPosition" (ngModelChange)="scriptChanged()">
+                            <mat-hint>0-{{ currentMap.layout.mapWidth }}</mat-hint>
+                        </mat-form-field> 
+                        <mat-form-field class="w-100 mb-2" appearance="outline">
+                            <mat-label>Map Y</mat-label>
+                            <input type="number" min="0" max="{{ currentMap.layout.mapHeight }}" matInput placeholder="0" [(ngModel)]="currentScript.yPosition" (ngModelChange)="scriptChanged()" >
+                            <mat-hint>0-{{ currentMap.layout.mapHeight }}</mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Variable Number</mat-label>
+                        <input type="number" min="0" matInput placeholder="0" [(ngModel)]="currentScript.varNumber" (ngModelChange)="scriptChanged()">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Variable Value</mat-label>
+                        <input type="number" min="0" matInput placeholder="0" [(ngModel)]="currentScript.varValue" (ngModelChange)="scriptChanged()">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Script Address</mat-label>
+                        <input type="text" [value]="currentScript.scriptAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="currentScript.scriptAddress = getInputHexValue($event); scriptChanged();">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field>
+
+                    <p class="mb-1"><b>Data</b></p>
+                    <div class="bg-gray p-2 mb-2" *ngIf="currentScript && currentScript.data">
+                        <span *ngFor="let byteValue of currentScript.data" class="mr-2 mb-1 hex-value"><b>{{ (byteValue.toString(16).length == 1 ? '0' : '') + byteValue.toString(16).toUpperCase() + '  '}}</b></span>
+                    </div>
+
+                    <p class="mb-1"><b>Script</b></p>
+                    <div *ngIf="currentScript.script"
+                        class="bg-gray p-2 mb-0 overflow-hidden hex-value" >
+                        <div class="w-100 text-nowrap" [innerText]="currentScript.script" [style.height]="'194px'" [style.maxHeight]="'194px'">
+                            <div class="position-absolute w-100 script-fadeout" [style.bottom]="'0px'" [style.left]="'0px'" [style.height]="'25px'"></div>
+                        </div>
+                    </div>
+                    <div *ngIf="!currentScript.script"
+                        class="bg-gray p-2 mb-0">
+                        <div class="w-100 overflow-hidden" [style.height]="'194px'" [style.maxHeight]="'194px'">
+                            <p class="mb-1">No Script Found</p>
+                        </div>
+                    </div>
+                    <p class="text-gray mb-1" *ngIf="currentScript.script">Showing {{ currentScript.script.trim().split('\n').length >= 10 ? '10' : currentScript.script.trim().split('\n').length }} out of {{ currentScript.script.trim().split('\n').length }} lines.</p>
+                    <button *ngIf="currentScript.script" mat-raised-button type="button" color="primary" class="w-100" (click)="editScript()">
+                        <span>Edit Script</span>
+                    </button>
+                </div>
+
+                <!-- Encounters tab right panel -->
+                <div class="position-relative" *ngIf="currentMap && currentMap.encounterData && worldService.isLoaded && currentWorldTool == 'encounters'">
+                    <div class="w-100 p-3">
+                        <mat-form-field class="w-100" appearance="outline">
+                            <mat-label>Encounter Type</mat-label>
+                            <mat-select [(ngModel)]="currentEncounterType">
+                                <mat-option [value]="'GRASS'">Grass</mat-option>
+                                <mat-option [value]="'SURF'">Surf</mat-option>
+                                <mat-option [value]="'TREE'">Tree</mat-option>
+                                <mat-option [value]="'FISHING'">Fishing</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <div *ngIf="!currentMap.encounterData.containsType(currentEncounterType)" class="w-100">
+                            <p class="mb-3 text-gray">This map has no {{ currentEncounterType.toLowerCase() }} encounters. Adding new encounters will be available soon.</p>
+                        </div>
+
+                        <div *ngIf="currentMap.encounterData.containsType(currentEncounterType)" class="w-100">
+                            <p class="mb-3 text-gray">You may edit existing encounters. Adding new encounters will be available soon.</p>
+                            <div *ngFor="let tables of currentMap.encounterData.getTypeList(currentEncounterType).wildMonsters" class="w-100">
+                                <div class="border poke-border-sm mb-3 pt-3 px-3" *ngFor="let encounter of tables; let i = index">
+                                    <div class="d-inline-flex w-100 align-items-center">
+                                        <mat-form-field class="w-100" appearance="outline" >
+                                            <mat-label>Monster {{ i + 1 }}</mat-label>
+                                            <mat-select [(ngModel)]="encounter.monsterId" (ngModelChange)="updateEncounterSprites(); encounterChanged(encounter)">
+                                                <mat-option 
+                                                    *ngFor="let monster of monsterService.monsters; let i = index" 
+                                                    [value]="i">
+                                                    {{ monster.name }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field> 
+                                        <img *ngIf="encounter.spriteCanvas" [src]="encounter.spriteCanvas" width="64px" height="64px" class="ml-3" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <mat-form-field class="w-100" appearance="outline">
+                                                <mat-label>Min. Level</mat-label>
+                                                <input type="number" min="0" max="100" matInput placeholder="0" [(ngModel)]="encounter.minLevel" (ngModelChange)="encounterChanged(encounter)">
+                                                <mat-hint>0-100</mat-hint>
+                                            </mat-form-field> 
+                                        </div>
+                                        <div class="col-6">
+                                            <mat-form-field class="w-100" appearance="outline">
+                                                <mat-label>Max. Level</mat-label>
+                                                <input type="number" min="0" max="100" matInput placeholder="0" [(ngModel)]="encounter.maxLevel" (ngModelChange)="encounterChanged(encounter)">
+                                                <mat-hint>0-100</mat-hint>
+                                            </mat-form-field> 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Behavior tab right panel -->
+                <div class="position-relative" *ngIf="currentMap && worldService.isLoaded && currentWorldTool == 'behavior'">
+                    <div class="w-100 p-3">
+                        <p>Click or click-and-drag over a highlighted tile to preview its walk-over behavior.</p>
+                        <p>This tool currently supports:</p>
+                        <ul>
+                            <li>Grass Walking Animations</li>
+                            <li>Puddle Ripple Animations</li>
+                        </ul>
+                        <p><em>For an example of both of these animations in action, view Island Four (FRLG).</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

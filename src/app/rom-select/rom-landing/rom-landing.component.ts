@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { RomHeader, RomService } from 'src/app/services/rom.service';
+import { RomHeader, RomService } from 'src/app/gba/services/rom.service';
 
 @Component({
   selector: 'app-rom-landing',

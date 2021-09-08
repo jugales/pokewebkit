@@ -1,18 +1,18 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './auth.guard';
-import { MainComponent } from './main/main.component';
+import { GbaComponent } from './gba/gba.component';
 import { RomSelectComponent } from './rom-select/rom-select.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: MainComponent,
+    component: GbaComponent,
     canActivate: [AuthGuard],
     children: [
       {
         path: '',
-        loadChildren: () => import('./main/home/home.module').then(m => m.HomeModule), 
+        loadChildren: () => import('./gba/home/home.module').then(m => m.HomeModule), 
         pathMatch: 'full'
       }
     ]

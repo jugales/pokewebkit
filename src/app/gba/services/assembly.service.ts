@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GbaService } from './rom.service';
+import { GbaService } from './gba.service';
 
 /**
  * TODO: Clean this up

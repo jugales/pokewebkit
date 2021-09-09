@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { GbaService } from './services/rom.service';
-import { SaveDialogComponent } from './save-dialog/save-dialog.component';
+import { GbaService } from './services/gba.service';
+import { SaveDialogGbaComponent } from './save-dialog-gba/save-dialog-gba.component';
 
 @Component({
   selector: 'app-gba',
@@ -22,6 +22,6 @@ export class GbaComponent implements OnInit {
   }
 
   public saveChanges() {
-    this.dialog.open(SaveDialogComponent);
+    this.dialog.open(SaveDialogGbaComponent);
   }
 }

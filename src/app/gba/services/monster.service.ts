@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BitmapAnimation, BitmapPalette, BitmapPixelData, BitmapPixelDepth, BitmapService } from './bitmap.service';
-import { GbaService } from './rom.service';
+import { GbaService } from './gba.service';
 
 @Injectable({
   providedIn: 'root'

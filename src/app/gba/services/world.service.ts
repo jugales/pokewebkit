@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AssemblyService } from './assembly.service';
 import { BitmapAnimation, BitmapPalette, BitmapPixelData, BitmapPixelDepth, BitmapService } from './bitmap.service';
 import { OverworldService } from './overworld.service';
-import { GbaService } from './rom.service';
+import { GbaService } from './gba.service';
 import { MapBlock, MapBlockData, MapBlockset, MapBlockTile, MapEncounterData, MapEntityData, MapFieldOverlay, MapHeader, MapLayout, MapTileset, PokeDoor, PokeMap } from './world-structures';
 
 @Injectable({

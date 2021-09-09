@@ -1,0 +1,12 @@
+<mat-card class="w-100 p-0 poke-tool-card noselect">
+    <mat-tab-group #toolGroup>
+        
+    </mat-tab-group>
+</mat-card>
+<div class="w-100 d-inline-flex justify-content-between align-items-center px-2" [style.height]="'36px'">
+  <span *ngIf="ndsService.isLoaded">NDS ROM loaded in {{ (ndsService.romLoadTime / 1000).toFixed(1) }} seconds</span>
+  <div class="d-inline-flex">
+    <a href="https://www.pokecommunity.com/showthread.php?t=456210" target="_blank" class="mr-3">PokéCommunity</a>
+    <a href="https://github.com/jugales/pokewebkit" target="_blank">Github</a>
+  </div>
+</div>

@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { CharacterSetService } from 'src/app/gba/services/character-set.service';
-import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/gba.service';
 
 @Component({
-  selector: 'app-save-dialog',
-  templateUrl: './save-dialog.component.html',
-  styleUrls: ['./save-dialog.component.css']
+  selector: 'app-save-dialog-gba',
+  templateUrl: './save-dialog-gba.component.html',
+  styleUrls: ['./save-dialog-gba.component.css']
 })
-export class SaveDialogComponent implements OnInit {
+export class SaveDialogGbaComponent implements OnInit {
 
   constructor(private dialog: MatDialog, public gbaService: GbaService,
     public characterSetService: CharacterSetService) { }

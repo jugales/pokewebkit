@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { RomHeader, GbaService } from 'src/app/gba/services/rom.service';
+import { RomHeader, GbaService } from 'src/app/gba/services/gba.service';
+import { NdsService } from 'src/app/nds/services/nds.service';
 
 @Component({
   selector: 'app-rom-landing',
@@ -10,7 +11,8 @@ import { RomHeader, GbaService } from 'src/app/gba/services/rom.service';
 })
 export class RomLandingComponent implements OnInit {
 
-  constructor(private gbaService: GbaService, private title: Title, private router: Router) { }
+  constructor(private gbaService: GbaService, private ndsService: NdsService,
+    private title: Title, private router: Router) { }
 
   ngOnInit(): void {
     this.gbaService.romLoaded.subscribe(() => {
@@ -26,16 +28,27 @@ export class RomLandingComponent implements OnInit {
     let r = new FileReader();
 
     // can't use class variables in the onload
+    let startTime = Date.now();
     let gbaService: GbaService = this.gbaService;
+    let ndsService: NdsService = this.ndsService;
     let router: Router = this.router; 
+    let file: File = event.target.files[0];
     r.onload = function() {
-      let startTime: number = Date.now();
       let fileData = r.result;
-      gbaService.loadRom(fileData as ArrayBuffer, startTime);
+      
+      if (file.name.endsWith('.gba')) {
+        gbaService.loadRom(fileData as ArrayBuffer, startTime);
+        router.navigate(['/gba']);
+        console.log('Going to GBA page');
+      } else if (file.name.endsWith('.nds')) {
+        ndsService.loadRom(fileData as ArrayBuffer, startTime);
+        router.navigate(['/nds']);
+        console.log('Going to NDS page');
+      }
 
-      router.navigate(['/']);
+      console.log('Done file processing');
     }
-    r.readAsArrayBuffer(event.target.files[0]);
+    r.readAsArrayBuffer(file);
   }
 
 }

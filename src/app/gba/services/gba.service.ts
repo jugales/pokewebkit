@@ -14,9 +14,6 @@ export class GbaService {
   private HEADER_MAKER_CODE_LENGTH: number = 2;
   private HEADER_VERSION_ADDRESS: number = 0xBC;
 
-  public buffer: any;
-  public binary: Uint8Array;
-  public writableBinary: Uint8Array;
   public position: number = 0;
 
   public header: RomHeader = new RomHeader();
@@ -49,9 +46,6 @@ export class GbaService {
     this.readBuffer = new DataView(buffer);
     this.writeBuffer = new DataView(buffer.slice(0)); // copy-of as writable, so we can manipulate the readable (e.g. tile animations) without real editing
 
-    this.binary = new Uint8Array(buffer);
-    this.writableBinary = this.binary.slice(0);
-    this.buffer = buffer;
     this.loadHeader();
   }
 
@@ -340,7 +334,7 @@ export class GbaService {
 
   public revert() {
     this.reset();
-    this.loadRom(this.buffer);
+    this.loadRom(this.readBuffer.buffer);
 
     this.romLoaded.emit();
   }
@@ -348,7 +342,6 @@ export class GbaService {
   public reset() {
     this.position = 0;
     this.header = new RomHeader();
-    this.binary = undefined;
     this.readBuffer = undefined;
     this.writeBuffer = undefined;
   }

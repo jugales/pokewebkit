@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CharacterSetService } from './character-set.service';
 import { PorkyScriptCommandTemplate, PorkyScriptConstants } from './porky-script-constants';
-import { GbaService } from './rom.service';
+import { GbaService } from './gba.service';
 import * as _ from 'lodash-es';
 
 

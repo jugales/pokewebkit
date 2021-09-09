@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CharacterSetService } from 'src/app/gba/services/character-set.service';
 import { ItemService, PokeItem } from 'src/app/gba/services/item.service';
-import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/gba.service';
 import { ViewportService } from 'src/app/gba/services/viewport.service';
 
 @Component({

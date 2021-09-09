@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { BattlefieldService, PokeBattlefield } from 'src/app/gba/services/battlefield.service';
-import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/gba.service';
 
 @Component({
   selector: 'app-battlefield-editor',

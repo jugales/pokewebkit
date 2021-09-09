@@ -1,0 +1,24 @@
+<div class="w-100 bg-white px-3 py-1 poke-shadow-sm d-inline-flex align-items-center">
+    <div class="mr-3">
+        <img src="./assets/images/logo.png" alt="PokeTool logo" height="50px" />
+    </div>
+    <div class="w-100 phone-or-bigger">
+        <h2 class="mb-0 font-p2 poke-title">PokéWebKit</h2>
+        <p class="mb-0 poke-tagline">Edit ROM data on the fly[gon]</p>
+    </div>
+    <div class="w-100">
+        <div class="float-right d-inline-flex align-items-center">
+            <div *ngIf="ndsService.isLoaded" class="poke-header-line mr-3">
+                <p class="mb-0">{{ ndsService.header.title }}</p>
+                <p class="mb-0">{{ ndsService.header.gameCode }} v1.{{ ndsService.header.version }}</p>
+            </div>
+
+            <button *ngIf="ndsService.pendingChanges.size > 0" mat-raised-button type="button" color="primary" (click)="saveChanges()">Save Changes</button>
+            <button *ngIf="ndsService.pendingChanges.size == 0" mat-raised-button type="button" color="primary" disabled>No Changes</button>
+        </div>
+    </div>
+</div>
+
+<div class="w-100 d-flex flex-column">
+    <router-outlet></router-outlet>
+</div>

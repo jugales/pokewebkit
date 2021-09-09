@@ -2,7 +2,7 @@ import { Byte } from '@angular/compiler/src/util';
 import { Component, OnInit } from '@angular/core';
 import { ItemService } from 'src/app/gba/services/item.service';
 import { Monster, MonsterService } from 'src/app/gba/services/monster.service';
-import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/gba.service';
 
 @Component({
   selector: 'app-monster-editor',

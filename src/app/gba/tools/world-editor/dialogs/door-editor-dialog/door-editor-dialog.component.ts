@@ -1,7 +1,7 @@
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BitmapAnimation, BitmapService } from 'src/app/gba/services/bitmap.service';
-import { GbaService } from 'src/app/gba/services/rom.service';
+import { GbaService } from 'src/app/gba/services/gba.service';
 import { ViewportService } from 'src/app/gba/services/viewport.service';
 import { WorldService } from 'src/app/gba/services/world.service';
 import { MapBlock, PokeDoor, PokeMap } from 'src/app/gba/services/world-structures';

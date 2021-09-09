@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CharacterSetService } from 'src/app/gba/services/character-set.service';
 import { ItemService } from 'src/app/gba/services/item.service';
 import { MonsterService } from 'src/app/gba/services/monster.service';
-import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/gba.service';
 import { PokeTrainer, TrainerService } from 'src/app/gba/services/trainer.service';
 
 @Component({

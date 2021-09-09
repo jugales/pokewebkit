@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { GbaService } from './rom.service';
+import { GbaService } from './gba.service';
 
 const LZ77_OPCODE = 0x10;
 const TILE_SIZE = 8;

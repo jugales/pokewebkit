@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
-import { PendingChange, GbaService } from 'src/app/gba/services/rom.service';
+import { PendingChange, GbaService } from 'src/app/gba/services/gba.service';
 import { WorldService } from 'src/app/gba/services/world.service';
 import { MapBlock, MapBlockData, MapBlockTile, MapFieldOverlay, MapFieldOverlayDrawable, MapNPCData, MapScriptData, MapSignData, MapWarpData, PokeMap, WildMonsterData } from 'src/app/gba/services/world-structures';
 import { BitmapService } from 'src/app/gba/services/bitmap.service';

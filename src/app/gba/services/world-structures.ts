@@ -1,6 +1,6 @@
 import { NgZone } from '@angular/core';
 import { BitmapAnimation, BitmapPalette, BitmapPixelData, BitmapPixelDepth, BitmapService } from './bitmap.service';
-import { GbaService } from './rom.service';
+import { GbaService } from './gba.service';
 import { PokeTrainer } from './trainer.service';
 
 export class PokeMap {

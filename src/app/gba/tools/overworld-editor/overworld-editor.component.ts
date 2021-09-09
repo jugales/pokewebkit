@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { OverworldService, PokeOverworldSprite } from 'src/app/gba/services/overworld.service';
-import { GbaService } from 'src/app/gba/services/rom.service';
+import { GbaService } from 'src/app/gba/services/gba.service';
 import { OverworldPaletteEditorDialogComponent } from './dialogs/overworld-palette-editor-dialog/overworld-palette-editor-dialog.component';
 
 @Component({

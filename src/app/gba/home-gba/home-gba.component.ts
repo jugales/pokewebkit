@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
-import { GbaService } from 'src/app/gba/services/rom.service';
+import { GbaService } from 'src/app/gba/services/gba.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  selector: 'app-home-gba',
+  templateUrl: './home-gba.component.html',
+  styleUrls: ['./home-gba.component.css']
 })
-export class HomeComponent implements AfterViewInit {
+export class HomeGbaComponent implements AfterViewInit {
 
   public isLoaded: boolean = false;
   public romLoadTime: number = undefined;

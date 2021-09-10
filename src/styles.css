@@ -25,6 +25,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .bg-gray-dark {
     background-color: #222222 !important;
 }
+.bg-gray-dark-hover:hover {
+    background-color: #ccc;
+}
 .text-gray {
     color: #969696;
 }

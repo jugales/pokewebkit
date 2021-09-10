@@ -10,7 +10,7 @@
         <div class="float-right d-inline-flex align-items-center">
             <div *ngIf="ndsService.isLoaded" class="poke-header-line mr-3">
                 <p class="mb-0">{{ ndsService.header.title }}</p>
-                <p class="mb-0">{{ ndsService.header.gameCode }} v1.{{ ndsService.header.version }}</p>
+                <p class="mb-0">{{ ndsService.header.gameCode }} v{{ ndsService.header.version }}</p>
             </div>
 
             <button *ngIf="ndsService.pendingChanges.size > 0" mat-raised-button type="button" color="primary" (click)="saveChanges()">Save Changes</button>

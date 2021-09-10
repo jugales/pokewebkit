@@ -1,0 +1,12 @@
+.file-list {
+    min-width: 240px;
+    max-width: 240px;
+}
+
+.back-button {
+    height: 36px;
+    width: 36px;
+    line-height: 36px;
+    border-radius: 18px;
+    text-align: center;
+}

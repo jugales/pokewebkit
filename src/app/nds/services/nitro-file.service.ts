@@ -1,3 +1,4 @@
+import { EventEmitter } from '@angular/core';
 import { Injectable } from '@angular/core';
 import { NdsService } from './nds.service';
 
@@ -9,6 +10,9 @@ export class NitroFileService {
   public fileAllocationTable: NitroFAT;
   public fileNameTable: NitroFNT;
 
+  public isLoaded: boolean = false;
+  public onFileSystemLoad: EventEmitter<any> = new EventEmitter<any>();
+
   constructor() { 
 
   }
@@ -16,6 +20,8 @@ export class NitroFileService {
   public load(ndsService: NdsService) {
     this.fileAllocationTable = new NitroFAT(ndsService);
     this.fileNameTable = new NitroFNT(ndsService, this.fileAllocationTable);
+    this.isLoaded = true;
+    this.onFileSystemLoad.emit();
   }
 
   public getFileByType(type: string, path: string) {

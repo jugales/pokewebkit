@@ -1,3 +1,4 @@
+import { EventEmitter } from '@angular/core';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -13,6 +14,7 @@ export class NdsService {
 
   public romLoadTime: number = 0;
   public isLoaded: boolean = false;
+  public onRomLoad: EventEmitter<any> = new EventEmitter<any>();
 
   public pendingChanges: Map<String, PendingChange> = new Map<String, PendingChange>();
 
@@ -28,7 +30,8 @@ export class NdsService {
     this.loadHeader();
     this.romLoadTime = Date.now() - startTime;
     this.isLoaded = true;
-    
+    this.onRomLoad.emit();
+
     console.log('Loaded NDS ROM in ' + this.romLoadTime);
   }
 

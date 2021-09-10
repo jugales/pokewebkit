@@ -1,6 +1,6 @@
 <mat-card class="w-100 p-0 poke-tool-card noselect">
-    <mat-tab-group #toolGroup>
-        
+  <mat-tab-group #toolGroup>
+    <mat-tab label="Files" #fileTool><ng-template matTabContent><app-file-editor></app-file-editor></ng-template></mat-tab>
     </mat-tab-group>
 </mat-card>
 <div class="w-100 d-inline-flex justify-content-between align-items-center px-2" [style.height]="'36px'">

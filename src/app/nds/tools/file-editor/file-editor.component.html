@@ -1,0 +1,90 @@
+<div class="d-inline-flex poke-tool-card-inner w-100">
+    <div class="d-flex flex-column poke-tool-card-inner bg-gray file-list overflow-auto">
+        <div class="w-100 d-inline-flex align-items-center file-list">
+            <div class="mx-3 pt-2">
+                <div (click)="goBack()" class="cursor-pointer back-button d-inline-flex align-items-center justify-content-center bg-gray-dark-hover" matRipple>
+                    <mat-icon>arrow_backward</mat-icon>
+                </div>
+            </div>
+            <mat-divider [vertical]="true"></mat-divider>
+            <div class="mr-3 pt-2">
+                <p class="mb-0"><b>Current Folder</b></p>
+                <p class="mb-0">{{ currentPath }}</p>
+            </div>
+        </div>
+        <mat-list *ngIf="currentFolder" class="file-list">
+            <mat-list-item 
+                *ngFor="let folder of currentFolder.folders" 
+                class="poke-tool-sidenav-item-inner border-top hex-value"
+                (click)="setCurrentFolder(folder)"
+                matRipple>
+                <mat-icon class="cursor-pointer mr-2">arrow_forward</mat-icon>
+                <span><b>{{ folder.name }}</b></span>
+            </mat-list-item>
+    
+            <mat-list-item 
+                *ngFor="let file of currentFolder.files" 
+                class="poke-tool-sidenav-item-inner border-top hex-value"
+                (click)="setCurrentFile(file)"
+                matRipple>
+                <span><b>{{ file.name }}</b></span>
+            </mat-list-item>
+        </mat-list>
+    </div>
+    <div class="p-3 d-inline-flex poke-tool-card-inner overflow-auto w-100" *ngIf="currentFile">
+        <div class="w-100">
+            <div class="row">
+                <div class="col-md-3">
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>Name</mat-label>
+                        <input matInput placeholder="??????????" maxlength="13" [(ngModel)]="currentFile.name" readonly>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100 mb-2" appearance="outline">
+                        <mat-label>Address</mat-label>
+                        <input type="text" [value]="currentFile.address.toString(16).toUpperCase()" matInput placeholder="0" (change)="currentFile.address = getInputHexValue($event);">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-9">
+                    <div class="bg-gray w-100" *ngIf="currentFileData">
+                        <div class="mb-2 p-2 border-bottom">
+                            <span 
+                                *ngFor="let u of [].constructor(16); let i = index"
+                                class="hex-value"><b>{{ (i.toString(16).length == 1 ? '0' : '') + i.toString(16).toUpperCase() + '  ' }}</b>
+                            </span>
+                            <span class="float-right">
+                                    <mat-icon 
+                                    class="cursor-pointer" 
+                                    [ngClass]="currentHexPage == 0 ? 'text-gray' : ''"
+                                    (click)="goBackHexPage()">arrow_back</mat-icon>
+                                <mat-icon 
+                                    class="cursor-pointer" 
+                                    (click)="goForwardHexPage()">arrow_forward</mat-icon>
+                            </span>
+                        </div>
+                        <div class="p-2 d-inline-flex w-100">
+                            <div class="border-right mr-3">
+                                <span 
+                                    *ngFor="let byteValue of currentFileData; let i = index" 
+                                    class="hex-value">
+                                    <br *ngIf="i !== 0 && i % 16 == 0" />
+                                    <b>{{ (byteValue.toString(16).length == 1 ? '0' : '') + byteValue.toString(16).toUpperCase() + '  ' }}</b>
+                                </span>
+                            </div>
+                            <div>
+                                <span 
+                                    *ngFor="let byteValue of currentFileData; let i = index" 
+                                    class="hex-value">
+                                    <br *ngIf="i !== 0 && i % 16 == 0" />
+                                    <b>{{ characterFromByte(byteValue) }}</b>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>

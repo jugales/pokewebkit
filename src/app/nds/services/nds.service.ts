@@ -61,19 +61,28 @@ export class NdsService {
     this.position += amount;
   }
 
-  public getByte() {
+  public getByte(position?: number) {
+    if (position)
+      this.position = position;
+
     let result = this.readBuffer.getUint8(this.position);
     this.position++;
     return result;
   }
 
-  public getShort() {
+  public getShort(position?: number) {
+    if (position)
+      this.position = position;
+
     let result = this.readBuffer.getUint16(this.position, true);
     this.position += 2;
     return result;
   }
 
-  public getInt() {
+  public getInt(position?: number) {
+    if (position)
+    this.position = position;
+
     let result = this.readBuffer.getUint32(this.position, true);
     this.position += 4;
     return result;

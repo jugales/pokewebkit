@@ -29,7 +29,7 @@ export class HomeNdsComponent implements AfterViewInit {
     // console.log(narcFile.folders);
 
     // uncomment below to preview BTX0 file read (NARC must be enabled and set to a/0/8/1 to work)
-    // let btxFileInfo: NitroFileInfo = narcFile.files[190];
+    // let btxFileInfo: NitroFileInfo = narcFile.files[0];
     // let btxFile: BTX0 = new BTX0(this.ndsService, btxFileInfo, this.utilService);
     // btxFile.unpack();
     // for (let i = 0; i < btxFile.frames.length; i++)

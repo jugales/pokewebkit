@@ -2154,3 +2154,7 @@ th.mat-header-cell, td.mat-cell, td.mat-footer-cell {
   max-width: auto !important;
   max-height: auto !important;
 }
+
+.file-list .mat-list-base .mat-list-item, .mat-list-base .mat-list-option {
+  height: 32px !important;
+}

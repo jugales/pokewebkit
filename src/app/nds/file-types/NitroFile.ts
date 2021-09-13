@@ -50,6 +50,10 @@ export class NitroFile {
         }
         this.header = header;
     }
+
+    public unpack() {
+        // To be overridden
+    }
 }
 export class NitroHeader {
 

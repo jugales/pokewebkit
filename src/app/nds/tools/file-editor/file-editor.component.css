@@ -1,6 +1,7 @@
 .file-list {
+    width: auto !important;
     min-width: 240px;
-    max-width: 240px;
+    overflow-x: hidden;
 }
 
 .back-button {

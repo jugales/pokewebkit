@@ -215,3 +215,18 @@ img {
         max-height: calc(100vh - 137px - 8px) !important; /* viewport height - header height - footer height */
     }
 }
+
+.material-icons-outlined {
+    font-family: 'Material Icons Outlined' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-size: 24px !important;
+    line-height: 1 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    direction: ltr !important;
+    -webkit-font-smoothing: antialiased !important;
+}

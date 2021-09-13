@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { BTX0 } from '../../file-types/BTX0';
+import { NARC } from '../../file-types/NARC';
+import { NitroFile, NitroHeaderType } from '../../file-types/NitroFile';
 import { NdsService } from '../../services/nds.service';
 import {  NitroFileInfo, NitroFileService, NitroFolder } from '../../services/nitro-file.service';
+import { UtilService } from '../../services/util.service';
 
 
 @Component({
@@ -13,12 +17,15 @@ export class FileEditorComponent implements OnInit {
   public currentPath: string = 'root';
   public currentFolder: NitroFolder;
 
-  public currentFile: NitroFileInfo;
+  public currentFile: NitroFile;
   public currentFileData: number[] = [];
 
+  public hexPageSize: number = 512;
   public currentHexPage: number = 0;
+  public currentHexPageCount: number = 1;
 
-  constructor(public ndsService: NdsService, private fileService: NitroFileService) { }
+  constructor(public ndsService: NdsService, private fileService: NitroFileService,
+    private utilityService: UtilService) { }
 
   ngOnInit(): void {
     if (this.ndsService.isLoaded && this.fileService.isLoaded)
@@ -41,11 +48,26 @@ export class FileEditorComponent implements OnInit {
       this.currentPath += '/' + folder.name;
   }
 
-  public setCurrentFile(file: NitroFileInfo) {
-    this.currentFile = file;
+  public setCurrentFile(fileInfo: NitroFileInfo) {
+    this.currentFile = new NitroFile(this.ndsService, fileInfo);
 
-    this.ndsService.goTo(file.address);
-    this.currentFileData = this.ndsService.getBytes(1024);
+    this.ndsService.goTo(fileInfo.address);
+    this.currentFile.readHeader(NitroHeaderType.Length_12);
+
+    switch (this.currentFile.header.extension) {
+      case 'NARC':
+        this.currentFile = new NARC(this.ndsService, fileInfo);
+        break;
+      case 'BTX0':
+        this.currentFile = new BTX0(this.ndsService, fileInfo, this.utilityService);
+        break;
+    }
+
+    this.currentFile.unpack();
+    this.ndsService.goTo(fileInfo.address);
+    this.currentFileData = this.ndsService.getBytes(fileInfo.size <= this.hexPageSize ? fileInfo.size : this.hexPageSize);
+    this.currentHexPageCount = (Math.floor(fileInfo.size / this.hexPageSize)) + 1;
+    this.currentHexPage = 0;
   }
 
   public goBack() {
@@ -70,9 +92,20 @@ export class FileEditorComponent implements OnInit {
   }
 
   public goForwardHexPage() {
+    if (this.currentHexPage + 1 >= this.currentHexPageCount)
+      return;
+
+    let isLastPage: boolean = this.currentHexPage + 2 == this.currentHexPageCount;
+
     this.currentHexPage++;
-    this.ndsService.goTo(this.currentFile.address + (this.currentHexPage * 1024));
-    this.currentFileData = this.ndsService.getBytes(1024);
+    this.ndsService.goTo(this.currentFile.fileInfo.address + (this.currentHexPage * this.hexPageSize));
+
+    console.log(isLastPage);
+
+    if (!isLastPage)
+      this.currentFileData = this.ndsService.getBytes(this.hexPageSize);
+    else
+      this.currentFileData = this.ndsService.getBytes(Math.floor(this.currentFile.fileInfo.size % this.hexPageSize));
   }
 
   public goBackHexPage() {
@@ -80,8 +113,8 @@ export class FileEditorComponent implements OnInit {
       return;
 
     this.currentHexPage--;
-    this.ndsService.goTo(this.currentFile.address + (this.currentHexPage * 1024));
-    this.currentFileData = this.ndsService.getBytes(1024);
+    this.ndsService.goTo(this.currentFile.fileInfo.address + (this.currentHexPage * this.hexPageSize));
+    this.currentFileData = this.ndsService.getBytes(this.hexPageSize);
   }
 
   public characterFromByte(number: number) {

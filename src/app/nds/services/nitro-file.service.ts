@@ -89,7 +89,8 @@ export class NitroFAT {
     for (let i = 0; i < ndsService.header.fatLength / 8; i++) {
       let entry: NitroFATEntry = new NitroFATEntry();
       entry.offset = ndsService.getInt();
-      entry.size = ndsService.getInt();
+      entry.size = ndsService.getInt() - entry.offset;
+      console.log({ offset: entry.offset, size: entry.size });
 
       this.entries.push(entry);
     }

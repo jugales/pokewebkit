@@ -1,5 +1,5 @@
-import { NdsService } from "../nds.service";
-import { NitroFileInfo, NitroFolder } from "../nitro-file.service";
+import { NdsService } from "../services/nds.service";
+import { NitroFileInfo, NitroFolder } from "../services/nitro-file.service";
 import { NitroFile, NitroHeaderType } from "./NitroFile";
 
 export class NARC extends NitroFile {

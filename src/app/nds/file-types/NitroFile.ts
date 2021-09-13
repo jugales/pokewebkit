@@ -1,5 +1,5 @@
-import { NdsService } from "../nds.service";
-import { NitroFileInfo } from "../nitro-file.service";
+import { NdsService } from "../services/nds.service";
+import { NitroFileInfo } from "../services/nitro-file.service";
 
 export class NitroFile {
 

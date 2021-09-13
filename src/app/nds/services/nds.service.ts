@@ -116,12 +116,15 @@ export class NdsService {
     let byteResult: number[] = this.getBytes(length);
     let result = '';
     for (let i = 0; i < byteResult.length; i++) {
-      if (byteResult[i] == 0) {
+      if (byteResult[i] == 0 || byteResult[i] == 1) {
         result += ' ';
         continue;
       }
 
-      result += String.fromCharCode(byteResult[i]);
+      if (byteResult[i] <= 127 || String.fromCharCode(byteResult[i]) == 'é') {
+        result += String.fromCharCode(byteResult[i]);
+      }
+      
     }
       
     return result.trim();

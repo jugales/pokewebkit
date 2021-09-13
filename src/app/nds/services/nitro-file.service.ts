@@ -13,9 +13,7 @@ export class NitroFileService {
   public isLoaded: boolean = false;
   public onFileSystemLoad: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor() { 
-
-  }
+  constructor() { }
 
   public load(ndsService: NdsService) {
     this.fileAllocationTable = new NitroFAT(ndsService);

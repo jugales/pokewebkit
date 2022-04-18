@@ -126,7 +126,8 @@ export class MapTileset {
       if (this.blockCache.has(originalBlockIndex)) 
         return this.blockCache.get(originalBlockIndex);
   
-      if (blockId > gbaService.constants().MAIN_TILESET_BLOCK_COUNT) {
+      // Thank you mrbanjo (https://www.pokecommunity.com/showthread.php?p=10421125#post10421125)
+      if (blockId >= gbaService.constants().MAIN_TILESET_BLOCK_COUNT) {
         blockId -= gbaService.constants().MAIN_TILESET_BLOCK_COUNT;
       }
   
@@ -176,13 +177,15 @@ export class MapTileset {
       let bitmapLength = 8 * 8 / 2;
   
       let tilePixelsValues: number[] = [];
-      if (this.isSecondary && (normalizedTileId == tile.tileId)) {
+      // Thank you mrbanjo (https://www.pokecommunity.com/showthread.php?p=10421125#post10421125)
+      if ((normalizedTileId == tile.tileId && !this.isSecondary)
+        || (normalizedTileId != tile.tileId && this.isSecondary)) {
         for (let i = 0; i < bitmapLength; i++) {
-          tilePixelsValues[i] = this.alternatePixels[normalizedTileId * bitmapLength + i]
+          tilePixelsValues[i] = this.pixels[normalizedTileId * bitmapLength + i]
         }
       } else {
         for (let i = 0; i < bitmapLength; i++) {
-          tilePixelsValues[i] = this.pixels[normalizedTileId * bitmapLength + i]
+          tilePixelsValues[i] = this.alternatePixels[normalizedTileId * bitmapLength + i]
         }
       }
   

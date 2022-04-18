@@ -57,7 +57,7 @@ export class WorldEditorComponent implements OnInit {
   public isShowingOverworlds: boolean = true;
   public isMouseDown: boolean = false;
 
-  public zoom: number = 2;
+  public zoom: number = 1;
 
   public animatedTileIndexes: number[][] = [];
 
@@ -75,7 +75,7 @@ export class WorldEditorComponent implements OnInit {
 
   public worldRenderRef: any;
 
-  public isAnimatingTiles: boolean = true;
+  public isAnimatingTiles: boolean = false;
   public isBlocksetRendered: boolean = false;
   public isBlockChanged: boolean = false;
 

@@ -19,36 +19,29 @@ export class RomLandingComponent implements OnInit {
       let header: RomHeader = this.gbaService.header;
       let title: string = 'PokéWebKit: ' + header.title + ' (' + header.gameCode + ')' + (header.version == 1 ? 'v1.1' : '');
       this.title.setTitle(title);
-
-      this.router.navigate(['/']);
     });
   }
 
   public onFileInput(event: any) {
-    let r = new FileReader();
-
-    // can't use class variables in the onload
     let startTime = Date.now();
-    let gbaService: GbaService = this.gbaService;
-    let ndsService: NdsService = this.ndsService;
-    let router: Router = this.router; 
     let file: File = event.target.files[0];
-    r.onload = function() {
-      let fileData = r.result;
-      
-      if (file.name.endsWith('.gba')) {
-        gbaService.loadRom(fileData as ArrayBuffer, startTime);
-        router.navigate(['/gba']);
-        console.log('Going to GBA page');
-      } else if (file.name.endsWith('.nds')) {
-        ndsService.loadRom(fileData as ArrayBuffer, startTime);
-        router.navigate(['/nds']);
-        console.log('Going to NDS page');
-      }
 
-      console.log('Done file processing');
-    }
+    let r = new FileReader();
+    r.onload = () => this.loadROM(file.name, r.result as ArrayBuffer, startTime);
     r.readAsArrayBuffer(file);
+  }
+
+  private loadROM(fileName: string, fileData: ArrayBuffer, startTime: number) {
+    let extension: string = fileName.split('.').pop();
+    if (extension !== 'gba' && extension !== 'nds')
+      return;
+
+    if (extension === 'gba') 
+      this.gbaService.loadRom(fileData, startTime);
+    else if (extension === 'nds')
+      this.ndsService.loadRom(fileData, startTime);
+
+    this.router.navigate([`/${extension}`]);
   }
 
 }

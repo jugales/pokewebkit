@@ -1,0 +1,44 @@
+<div class="row">
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>HP</mat-label>
+            <input type="number" min="0" max="3" matInput placeholder="0" [(ngModel)]="monster.baseStats.hpYield" (ngModelChange)="baseStatsChanged()">
+            <mat-hint>0-3</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Speed</mat-label>
+            <input type="number" min="0" max="3" matInput placeholder="0" [(ngModel)]="monster.baseStats.speedYield" (ngModelChange)="baseStatsChanged()">
+            <mat-hint>0-3</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Attack</mat-label>
+            <input type="number" min="0" max="3" matInput placeholder="0" [(ngModel)]="monster.baseStats.attackYield" (ngModelChange)="baseStatsChanged()">
+            <mat-hint>0-3</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Defense</mat-label>
+            <input type="number" min="0" max="3" matInput placeholder="0" [(ngModel)]="monster.baseStats.defenseYield" (ngModelChange)="baseStatsChanged()">
+            <mat-hint>0-3</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Special Attack</mat-label>
+            <input type="number" min="0" max="3" matInput placeholder="0" [(ngModel)]="monster.baseStats.spAttackYield" (ngModelChange)="baseStatsChanged()">
+            <mat-hint>0-3</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Special Defense</mat-label>
+            <input type="number" min="0" max="3" matInput placeholder="0" [(ngModel)]="monster.baseStats.spDefenseYield" (ngModelChange)="baseStatsChanged()">
+            <mat-hint>0-3</mat-hint>
+        </mat-form-field> 
+    </div>
+</div>

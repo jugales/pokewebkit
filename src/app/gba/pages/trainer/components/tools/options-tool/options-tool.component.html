@@ -1,0 +1,45 @@
+<div class="row">
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>Gender</mat-label>
+            <mat-select [(ngModel)]="trainer.genderId" (ngModelChange)="trainerChanged()">
+                <mat-option [value]="0">Male</mat-option>
+                <mat-option [value]="1">Female</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>Class</mat-label>
+            <mat-select [(ngModel)]="trainer.trainerClass" (ngModelChange)="trainerChanged()">
+                <mat-option 
+                    *ngFor="let className of trainerService.classNames; let i = index" 
+                    [value]="i">
+                    {{ className }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>Music</mat-label>
+            <input type="number" min="0" matInput placeholder="0" [(ngModel)]="trainer.musicId" (ngModelChange)="trainerChanged()">
+        </mat-form-field>
+    </div>
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>AI</mat-label>
+            <input type="number" min="0" matInput placeholder="0" [(ngModel)]="trainer.ai" (ngModelChange)="trainerChanged()">
+        </mat-form-field>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <div class="w-100 d-flex flex-column poke-border-sm bg-gray p-3 mt-3">
+            <mat-checkbox [(ngModel)]="trainer.isDoubleBattle" (ngModelChange)="trainerChanged()">Double Battle</mat-checkbox>
+            <mat-checkbox class="mt-3" [(ngModel)]="trainer.hasHeldItems" (ngModelChange)="trainerChanged()">Held Items</mat-checkbox>
+            <mat-checkbox class="mt-3" [(ngModel)]="trainer.hasCustomMoves" (ngModelChange)="trainerChanged()">Custom Moves</mat-checkbox>    
+        </div>
+    </div>
+</div>
+

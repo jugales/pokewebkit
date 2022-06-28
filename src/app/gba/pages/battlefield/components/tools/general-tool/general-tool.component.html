@@ -1,0 +1,37 @@
+<div class="row">
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Background Image Address</mat-label>
+            <input type="text" [value]="battlefield.backgroundAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="battlefield.backgroundAddress = getInputHexValue($event); battlefieldChanged()">
+            <mat-hint>Hexidecimal big endian</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Background Tilemap Address</mat-label>
+            <input type="text" [value]="battlefield.backgroundTileAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="battlefield.backgroundTileAddress = getInputHexValue($event); battlefieldChanged()">
+            <mat-hint>Hexidecimal big endian</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Entry Image Address</mat-label>
+            <input type="text" [value]="battlefield.entryImageAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="battlefield.entryImageAddress = getInputHexValue($event); battlefieldChanged()">
+            <mat-hint>Hexidecimal big endian</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Entry Tilemap Address</mat-label>
+            <input type="text" [value]="battlefield.entryImageTileAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="battlefield.entryImageTileAddress = getInputHexValue($event); battlefieldChanged()">
+            <mat-hint>Hexidecimal big endian</mat-hint>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Palette Address</mat-label>
+            <input type="text" [value]="battlefield.paletteAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="battlefield.paletteAddress = getInputHexValue($event); battlefieldChanged()">
+            <mat-hint>Hexidecimal big endian</mat-hint>
+        </mat-form-field> 
+    </div>
+</div>

@@ -1,0 +1,60 @@
+
+<div class="container-fluid">
+    <div class="row mt-3">
+
+        <div class="col-md-3">
+            <!-- Select an trainer -->
+            <div id="search">
+                <mat-card class="mb-3 pb-0">
+                    <h3 class="mb-2" for="search"><b>Pick an Trainer</b></h3>
+                    <mat-form-field class="w-100 pb-0" appearance="fill">
+                        <mat-label>Selected Trainer</mat-label>
+                        <mat-select name="search" 
+                            *ngIf="trainerService.trainers && trainerService.isLoaded"
+                            [(ngModel)]="currentTrainer"
+                            (ngModelChange)="setCurrent(currentTrainer)">
+                            <mat-option *ngFor="let trainer of trainerService.trainers" [value]="trainer">{{ trainer.name ? trainer.name : '??????????' }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-card>
+            </div>
+            <!-- Trainer card -->
+            <div id="trainer-card">
+                <app-trainer-card [trainer]="currentTrainer"></app-trainer-card>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div id="editable-data" *ngIf="sprite">
+                <!-- Background image -->
+                <div class="poke-sprite-circle-big phone-or-bigger">
+                    <img [src]="sprite" class="editable-background" />
+                </div>
+                <!-- Tools -->
+                <mat-card class="mb-3">
+                    <h3 class="mb-2"><b>Pick a Tool</b></h3>
+                    <mat-tab-group>
+                        <mat-tab label="Options">
+                            <app-trainer-options-tool 
+                                [trainer]="currentTrainer" 
+                                (trainerUpdated)="updateTrainer($event)">
+                            </app-trainer-options-tool>
+                        </mat-tab>
+                        <mat-tab label="Items">
+                            <app-trainer-items-tool 
+                                [trainer]="currentTrainer" 
+                                (trainerUpdated)="updateTrainer($event)">
+                            </app-trainer-items-tool>
+                        </mat-tab>
+                        <mat-tab label="Party">
+                            <app-trainer-party-tool 
+                                [trainer]="currentTrainer" 
+                                (trainerUpdated)="updateTrainer($event)">
+                            </app-trainer-party-tool>
+                        </mat-tab>
+                    </mat-tab-group>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

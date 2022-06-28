@@ -1,0 +1,68 @@
+<div class="container-fluid">
+    <div class="row mt-3">
+
+        <div class="col-md-3">
+            <!-- Select a monster -->
+            <div id="search">
+                <mat-card class="mb-3 pb-0">
+                    <h3 class="mb-2" for="search"><b>Pick a Monster</b></h3>
+                    <mat-form-field class="w-100 pb-0" appearance="fill">
+                        <mat-label>Selected Monster</mat-label>
+                        <mat-select name="search" 
+                            *ngIf="monsterService.monsters && monsterService.isLoaded"
+                            [(ngModel)]="currentMonster"
+                            (ngModelChange)="setCurrent(currentMonster)">
+                            <mat-option *ngFor="let monster of monsterService.monsters" [value]="monster">{{ monster.name }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-card>
+            </div>
+            <!-- Monster card -->
+            <div id="monster-card">
+                <app-monster-card [monster]="currentMonster"></app-monster-card>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div id="editable-data" *ngIf="frontShinySprite">
+                <!-- Background image -->
+                <div class="poke-sprite-circle-big phone-or-bigger">
+                    <img [src]="frontShinySprite" class="editable-background" />
+                </div>
+                <!-- Tools -->
+                <mat-card class="mb-3">
+                    <h3 class="mb-2"><b>Pick a Tool</b></h3>
+                    <mat-tab-group>
+                        <mat-tab label="General">
+                            <app-monster-general-tool 
+                                [monster]="currentMonster" 
+                                (monsterUpdated)="updateMonster($event)">
+                            </app-monster-general-tool>
+                        </mat-tab>
+                        <mat-tab label="Battle Stats">
+                            <app-monster-battle-stats-tool 
+                                [monster]="currentMonster" 
+                                (monsterUpdated)="updateMonster($event)">
+                            </app-monster-battle-stats-tool>
+                        </mat-tab>
+                        <mat-tab label="EV Yields">
+                            <app-monster-ev-tool 
+                                [monster]="currentMonster" 
+                                (monsterUpdated)="updateMonster($event)">
+                            </app-monster-ev-tool>
+                        </mat-tab>
+                        <mat-tab label="Growth">
+                            <app-monster-growth-tool 
+                            [monster]="currentMonster" 
+                            (monsterUpdated)="updateMonster($event)">
+                        </app-monster-growth-tool>
+                        </mat-tab>
+                        <!-- <mat-tab label="Dex"> Content 3 </mat-tab> -->
+                        <!-- <mat-tab label="Evolutions"> Content 2 </mat-tab> -->
+                        <!-- <mat-tab label="Moves"> Content 3 </mat-tab> -->
+                    </mat-tab-group>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+<div class="row">
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Egg Group 1</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.eggGroup1" (ngModelChange)="baseStatsChanged()">
+                <mat-option [value]="1">Monster</mat-option>
+                <mat-option [value]="2">Water1</mat-option>
+                <mat-option [value]="3">Bug</mat-option>
+                <mat-option [value]="4">Flying</mat-option>
+                <mat-option [value]="5">Field</mat-option>
+                <mat-option [value]="6">Fairy</mat-option>
+                <mat-option [value]="7">Grass</mat-option>
+                <mat-option [value]="8">Human-Like</mat-option>
+                <mat-option [value]="9">Water3</mat-option>
+                <mat-option [value]="10">Mineral</mat-option>
+                <mat-option [value]="11">Amorphous</mat-option>
+                <mat-option [value]="12">Water2</mat-option>
+                <mat-option [value]="13">Ditto</mat-option>
+                <mat-option [value]="14">Dragon</mat-option>
+                <mat-option [value]="15">Undiscovered</mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Egg Group 2</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.eggGroup2" (ngModelChange)="baseStatsChanged()">
+                <mat-option [value]="1">Monster</mat-option>
+                <mat-option [value]="2">Water1</mat-option>
+                <mat-option [value]="3">Bug</mat-option>
+                <mat-option [value]="4">Flying</mat-option>
+                <mat-option [value]="5">Field</mat-option>
+                <mat-option [value]="6">Fairy</mat-option>
+                <mat-option [value]="7">Grass</mat-option>
+                <mat-option [value]="8">Human-Like</mat-option>
+                <mat-option [value]="9">Water3</mat-option>
+                <mat-option [value]="10">Mineral</mat-option>
+                <mat-option [value]="11">Amorphous</mat-option>
+                <mat-option [value]="12">Water2</mat-option>
+                <mat-option [value]="13">Ditto</mat-option>
+                <mat-option [value]="14">Dragon</mat-option>
+                <mat-option [value]="15">Undiscovered</mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Hatch Speed</mat-label>
+            <input type="number" max="255" matInput placeholder="0" [(ngModel)]="monster.baseStats.eggCycles">
+        </mat-form-field>
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Base Friendship</mat-label>
+            <input type="number" max="255" matInput placeholder="0" [(ngModel)]="monster.baseStats.baseFriendship">
+        </mat-form-field>
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Base Experience</mat-label>
+            <input type="number" max="255" matInput placeholder="0" [(ngModel)]="monster.baseStats.baseExpYield">
+        </mat-form-field>
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Level-Up Type</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.levelUpType" (ngModelChange)="baseStatsChanged()">
+                <mat-option [value]="0">Medium Fast</mat-option>
+                <mat-option [value]="1">Erratic</mat-option>
+                <mat-option [value]="2">Fluctuating</mat-option>
+                <mat-option [value]="3">Medium Slow</mat-option>
+                <mat-option [value]="4">Fast</mat-option>
+                <mat-option [value]="5">Slow</mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+</div>

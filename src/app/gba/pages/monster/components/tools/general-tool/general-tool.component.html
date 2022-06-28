@@ -1,0 +1,124 @@
+<div class="row">
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Type 1</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.type1" (ngModelChange)="baseStatsChanged()">
+                <mat-option [value]="0">Normal</mat-option>
+                <mat-option [value]="1">Fighting</mat-option>
+                <mat-option [value]="2">Flying</mat-option>
+                <mat-option [value]="3">Poison</mat-option>
+                <mat-option [value]="4">Ground</mat-option>
+                <mat-option [value]="5">Rock</mat-option>
+                <mat-option [value]="6">Bug</mat-option>
+                <mat-option [value]="7">Ghost</mat-option>
+                <mat-option [value]="8">Steel</mat-option>
+                <mat-option [value]="9">???</mat-option>
+                <mat-option [value]="10">Fire</mat-option>
+                <mat-option [value]="11">Water</mat-option>
+                <mat-option [value]="12">Grass</mat-option>
+                <mat-option [value]="13">Electric</mat-option>
+                <mat-option [value]="14">Psychic</mat-option>
+                <mat-option [value]="15">Ice</mat-option>
+                <mat-option [value]="16">Dragon</mat-option>
+                <mat-option [value]="17">Dark</mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Type 2</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.type2" (ngModelChange)="baseStatsChanged()">
+                <mat-option [value]="0">Normal</mat-option>
+                <mat-option [value]="1">Fighting</mat-option>
+                <mat-option [value]="2">Flying</mat-option>
+                <mat-option [value]="3">Poison</mat-option>
+                <mat-option [value]="4">Ground</mat-option>
+                <mat-option [value]="5">Rock</mat-option>
+                <mat-option [value]="6">Bug</mat-option>
+                <mat-option [value]="7">Ghost</mat-option>
+                <mat-option [value]="8">Steel</mat-option>
+                <mat-option [value]="9">???</mat-option>
+                <mat-option [value]="10">Fire</mat-option>
+                <mat-option [value]="11">Water</mat-option>
+                <mat-option [value]="12">Grass</mat-option>
+                <mat-option [value]="13">Electric</mat-option>
+                <mat-option [value]="14">Psychic</mat-option>
+                <mat-option [value]="15">Ice</mat-option>
+                <mat-option [value]="16">Dragon</mat-option>
+                <mat-option [value]="17">Dark</mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Ability 1</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.ability1" (ngModelChange)="baseStatsChanged()">
+                <mat-option 
+                    *ngFor="let abilityName of monsterService.abilityNames; let i = index" 
+                    [value]="i">
+                    {{ abilityName }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Ability 2</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.ability2" (ngModelChange)="baseStatsChanged()">
+                <mat-option 
+                    *ngFor="let abilityName of monsterService.abilityNames; let i = index" 
+                    [value]="i">
+                    {{ abilityName }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Item 1</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.item1" (ngModelChange)="baseStatsChanged()">
+                <mat-option 
+                    *ngFor="let item of itemService.items; let i = index" 
+                    [value]="item.uid">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Item 2</mat-label>
+            <mat-select [(ngModel)]="monster.baseStats.item2" (ngModelChange)="baseStatsChanged()">
+                <mat-option 
+                    *ngFor="let item of itemService.items; let i = index" 
+                    [value]="item.uid">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Gender Rate</mat-label>
+            <input type="number" max="255" matInput placeholder="0" [(ngModel)]="monster.baseStats.gender">
+        </mat-form-field>
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Catch Rate</mat-label>
+            <input type="number" max="255" matInput placeholder="0" [(ngModel)]="monster.baseStats.catchRate">
+        </mat-form-field>
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Run Rate</mat-label>
+            <input type="number" max="255" matInput placeholder="0" [(ngModel)]="monster.baseStats.safariZoneRate">
+        </mat-form-field>
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Color/Flip</mat-label>
+            <input type="number" max="255" matInput placeholder="0" [(ngModel)]="monster.baseStats.colorAndFlip">
+        </mat-form-field>
+    </div>
+</div>

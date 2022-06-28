@@ -1,0 +1,143 @@
+<!-- <div class="d-inline-flex poke-tool-card-inner w-100">
+
+    <div class="bg-gray overflow-auto tablet-or-bigger">
+        <div class="poke-tool-sidenav bg-gray">
+            <div class="poke-tool-sidenav-battlefield noselect" *ngFor="let battlefield of battlefieldService.battlefields; let i = index">
+                <div 
+                    *ngIf="battlefield" 
+                    (click)="setCurrent(i)"
+                    class="poke-tool-sidenav-battlefield-inner py-1 border-bottom" 
+                    [ngClass]="currentBattlefield == battlefield ? 'poke-tool-sidenav-battlefield-active' : ''"
+                    matRipple>
+                    <span class="poke-border-sm bg-white mx-2 py-0 px-2">{{ getPaddedId(i) }}</span><span>{{ battlefield.name }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-100 pt-3 px-3 overflow-auto poke-tool-card-inner" *ngIf="currentBattlefield">
+        <div class="w-100 phone-only">
+            <div class="row">
+                <div class="col-12">
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>Selected Battlefield</mat-label>
+                        <mat-select [(ngModel)]="currentBattlefield" (ngModelChange)="setCurrent(-1, currentBattlefield)">
+                            <mat-option [value]="battlefield" *ngFor="let battlefield of battlefieldService.battlefields; let i = index">{{ battlefield.name }}</mat-option>
+                        </mat-select>
+                    </mat-form-field> 
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-6">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Name (external)</mat-label>
+                    <input matInput placeholder="??????????" [(ngModel)]="currentBattlefield.name" readonly>
+                    <mat-hint>Cannot be edited</mat-hint>
+                </mat-form-field> 
+            </div>
+        </div>
+
+        <div class="w-100 d-inline-flex overflow-x-auto overflow-y-hidden bg-gray toolset-header-group" [style.height]="'40px'">
+            <div class="d-flex flex-column bg-gray px-2">
+                <div class="d-inline-flex align-battlefields-center" [style.height]="'40px'">
+                    <div class="d-inline-flex justify-content-center align-battlefields-center">
+                        <mat-checkbox [(ngModel)]="isShowingEntryOverlay" class="mb-0 ml-2">Entry Overlay</mat-checkbox>
+                        <button mat-stroked-button class="bg-white ml-3" (click)="changeZoom()">Zoom: {{ zoom }}x</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-100 mb-4" [style.minHeight]="(112 * zoom) + 'px'" [style.minWidth]="(256 * zoom) + 'px'">
+            <div class="position-relative" [style.minHeight]="(112 * zoom) + 'px'" [style.minWidth]="(256 * zoom) + 'px'">
+                <img *ngIf="currentBattlefield.backgroundImage" [src]="currentBattlefield.backgroundImage" [style.minHeight]="(112 * zoom) + 'px'" [style.minWidth]="(256 * zoom) + 'px'" class="mr-3 position-absolute" />
+                <img *ngIf="currentBattlefield.entryImage && isShowingEntryOverlay" [src]="currentBattlefield.entryImage" [style.minHeight]="(112 * zoom) + 'px'" [style.minWidth]="(256 * zoom) + 'px'" class="mr-3 position-absolute" />
+            </div>
+        </div>
+
+        <div class="w-100 p-3 border mb-3">
+            <div class="row">
+                <div class="col-6">
+                    <mat-form-field class="w-100 mt-2" appearance="outline">
+                        <mat-label>Background Image Address</mat-label>
+                        <input type="text" [value]="currentBattlefield.backgroundAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="currentBattlefield.backgroundAddress = getInputHexValue($event); battlefieldChanged()">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field> 
+                </div>
+                <div class="col-6">
+                    <mat-form-field class="w-100 mt-2" appearance="outline">
+                        <mat-label>Background Tilemap Address</mat-label>
+                        <input type="text" [value]="currentBattlefield.backgroundTileAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="currentBattlefield.backgroundTileAddress = getInputHexValue($event); battlefieldChanged()">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field> 
+                </div>
+                <div class="col-6">
+                    <mat-form-field class="w-100 mt-2" appearance="outline">
+                        <mat-label>Entry Image Address</mat-label>
+                        <input type="text" [value]="currentBattlefield.entryImageAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="currentBattlefield.entryImageAddress = getInputHexValue($event); battlefieldChanged()">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field> 
+                </div>
+                <div class="col-6">
+                    <mat-form-field class="w-100 mt-2" appearance="outline">
+                        <mat-label>Entry Tilemap Address</mat-label>
+                        <input type="text" [value]="currentBattlefield.entryImageTileAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="currentBattlefield.entryImageTileAddress = getInputHexValue($event); battlefieldChanged()">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field> 
+                </div>
+                <div class="col-6">
+                    <mat-form-field class="w-100 mt-2" appearance="outline">
+                        <mat-label>Palette Address</mat-label>
+                        <input type="text" [value]="currentBattlefield.paletteAddress.toString(16).toUpperCase()" matInput placeholder="0" (change)="currentBattlefield.paletteAddress = getInputHexValue($event); battlefieldChanged()">
+                        <mat-hint>Hexidecimal big endian</mat-hint>
+                    </mat-form-field> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<div class="container-fluid">
+    <div class="row mt-3">
+
+        <div class="col-md-3">
+            <!-- Select a battlefield -->
+            <div id="search">
+                <mat-card class="mb-3 pb-0">
+                    <h3 class="mb-2" for="search"><b>Pick a Battlefield</b></h3>
+                    <mat-form-field class="w-100 pb-0" appearance="fill">
+                        <mat-label>Selected Battlefield</mat-label>
+                        <mat-select #battlefieldSelect 
+                            name="search" 
+                            *ngIf="battlefieldService.battlefields && battlefieldService.isLoaded"
+                            [(ngModel)]="currentBattlefield"
+                            (ngModelChange)="setCurrent($event.index)">
+                            <mat-option *ngFor="let battlefield of battlefieldService.battlefields" [value]="battlefield">{{ battlefield.name }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-card>
+            </div>
+            <!-- Battlefield card -->
+            <div id="battlefield-card">
+                <app-battlefield-card [battlefield]="currentBattlefield"></app-battlefield-card>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div id="editable-data" *ngIf="currentBattlefield">
+                <!-- Tools -->
+                <mat-card class="mb-3">
+                    <h3 class="mb-2"><b>Pick a Tool</b></h3>
+                    <mat-tab-group>
+                        <mat-tab label="General">
+                            <app-battlefield-general-tool 
+                                [battlefield]="currentBattlefield" 
+                                (battlefieldUpdated)="updateBattlefield($event)">
+                            </app-battlefield-general-tool>
+                        </mat-tab>
+                    </mat-tab-group>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

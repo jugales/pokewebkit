@@ -1,18 +1,46 @@
 <div class="w-100 bg-white px-3 py-1 poke-shadow-sm d-inline-flex align-items-center">
-    <div class="mr-3">
-        <img src="./assets/images/logo.png" alt="PokeTool logo" height="50px" />
+    <div class="h-100 d-flex align-items-center justify-content-center" >
+        <button 
+            mat-fab 
+            [matMenuTriggerFor]="toolsMenu" 
+            aria-label="Menu button allowing access to other apps" 
+            class="mr-3"
+            [style.maxWidth]="'52px'"
+            [style.maxHeight]="'52px'">
+            <mat-icon>apps</mat-icon>
+        </button>
+        <mat-menu #toolsMenu="matMenu" [overlapTrigger]="false">
+            <button 
+                *ngFor="let tool of tools"
+                mat-menu-item 
+                [routerLink]="tool.url">
+                {{ tool.name }}
+            </button>
+        </mat-menu>
     </div>
-    <div class="w-100 phone-or-bigger">
-        <h2 class="mb-0 font-p2 poke-title">PokéWebKit</h2>
-        <p class="mb-0 poke-tagline">Edit ROM data on the fly[gon]</p>
+    <!-- <div class="mr-3">
+        <img src="./assets/images/logo.png" alt="PokeTool logo" height="50px" />
+    </div> -->
+    <div class="w-100">
+        <h2 class="mb-0 font-p2 poke-title phone-or-bigger">PokéWebKit</h2>
+        <h5 class="mb-0 font-p2 poke-title phone-only">PokéWebKit</h5>
+        <div *ngFor="let tool of tools">
+            <p class="mb-0 poke-tagline" *ngIf="currentRoute === tool.url">{{ tool.name }}</p>
+        </div>
     </div>
     <div class="w-100">
         <div class="float-right d-inline-flex align-items-center">
-            <div *ngIf="gbaService.isLoaded()" class="poke-header-line mr-3">
-                <p class="mb-0">{{ gbaService.header.title }}</p>
-                <p class="mb-0">{{ gbaService.header.gameCode }} v1.{{ gbaService.header.version }}</p>
-            </div>
-
+            <!-- <div class="mr-3">
+                <button mat-button [matMenuTriggerFor]="toolsMenu">Choose a Tool</button>
+                <mat-menu #toolsMenu="matMenu" [overlapTrigger]="false">
+                    <button 
+                        *ngFor="let tool of tools"
+                        mat-menu-item 
+                        [routerLink]="tool.url">
+                        {{ tool.name }}
+                    </button>
+                </mat-menu>
+            </div> -->
             <button *ngIf="gbaService.pendingChanges.size > 0" mat-raised-button type="button" color="primary" (click)="saveChanges()">Save Changes</button>
             <button *ngIf="gbaService.pendingChanges.size == 0" mat-raised-button type="button" color="primary" disabled>No Changes</button>
         </div>
@@ -20,5 +48,19 @@
 </div>
 
 <div class="w-100 d-flex flex-column">
-    <router-outlet></router-outlet>
+    <div class="w-100 p-0 poke-tool-card noselect">
+      <router-outlet></router-outlet>
+    </div>
+    <div class="w-100 d-inline-flex justify-content-between align-items-center" [style.height]="'36px'">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-inline-flex">
+                        <a href="https://www.pokecommunity.com/showthread.php?t=456210" target="_blank" class="mr-3">PokéCommunity</a>
+                        <a href="https://github.com/jugales/pokewebkit" target="_blank">Github</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

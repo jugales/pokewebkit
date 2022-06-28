@@ -1,0 +1,47 @@
+<div class="container-fluid">
+    <div class="row mt-3">
+
+        <div class="col-md-3">
+            <!-- Select an item -->
+            <div id="search">
+                <mat-card class="mb-3 pb-0">
+                    <h3 class="mb-2" for="search"><b>Pick an Item</b></h3>
+                    <mat-form-field class="w-100 pb-0" appearance="fill">
+                        <mat-label>Selected Item</mat-label>
+                        <mat-select name="search" 
+                            *ngIf="itemService.items && itemService.isLoaded"
+                            [(ngModel)]="currentItem"
+                            (ngModelChange)="setCurrent(currentItem)">
+                            <mat-option *ngFor="let item of itemService.items" [value]="item">{{ item.name }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-card>
+            </div>
+            <!-- Item card -->
+            <div id="item-card">
+                <app-item-card [item]="currentItem"></app-item-card>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div id="editable-data" *ngIf="sprite">
+                <!-- Background image -->
+                <div class="poke-sprite-circle-big phone-or-bigger">
+                    <img [src]="sprite" class="editable-background" />
+                </div>
+                <!-- Tools -->
+                <mat-card class="mb-3">
+                    <h3 class="mb-2"><b>Pick a Tool</b></h3>
+                    <mat-tab-group>
+                        <mat-tab label="General">
+                            <app-item-general-tool 
+                                [item]="currentItem" 
+                                (itemUpdated)="updateItem($event)">
+                            </app-item-general-tool>
+                        </mat-tab>
+                    </mat-tab-group>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

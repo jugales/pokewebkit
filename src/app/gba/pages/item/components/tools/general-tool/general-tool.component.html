@@ -1,0 +1,60 @@
+<div class="row">
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Internal ID</mat-label>
+            <input matInput placeholder="0" [(ngModel)]="item.uid" (ngModelChange)="baseItemDataChanged()">
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Pocket</mat-label>
+            <mat-select [(ngModel)]="item.pocket" *ngIf="gameCode.startsWith('BPRE')" (ngModelChange)="baseItemDataChanged()">
+                <mat-option [value]="0">None</mat-option>
+                <mat-option [value]="1">Items</mat-option>
+                <mat-option [value]="2">Key Items</mat-option>
+                <mat-option [value]="3">Poké Balls</mat-option>
+                <mat-option [value]="4">TM Case</mat-option>
+                <mat-option [value]="5">Berry Pouch</mat-option>
+            </mat-select>
+            <mat-select [(ngModel)]="item.pocket" *ngIf="gameCode === 'BPEE'" (ngModelChange)="baseItemDataChanged()">
+                <mat-option [value]="0">None</mat-option>
+                <mat-option [value]="1">Items</mat-option>
+                <mat-option [value]="2">Poké Balls</mat-option>
+                <mat-option [value]="3">TMs and HMs</mat-option>
+                <mat-option [value]="4">Berries</mat-option>
+                <mat-option [value]="5">Key Items</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Hold Effect</mat-label>
+            <mat-select [(ngModel)]="item.holdEffect" (ngModelChange)="baseItemDataChanged()">
+                <mat-option *ngFor="let effect of holdEffects" [value]="effect.value">{{ effect.effect }}</mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Effect Parameter</mat-label>
+            <input matInput placeholder="000" [(ngModel)]="item.parameter" (ngModelChange)="baseItemDataChanged()">
+        </mat-form-field> 
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Price</mat-label>
+            <input matInput placeholder="000" [(ngModel)]="item.price" (ngModelChange)="baseItemDataChanged()">
+        </mat-form-field> 
+    </div>
+    <div class="col-6">
+        <mat-form-field class="w-100 mt-3" appearance="fill">
+            <mat-label>Description</mat-label>
+            <textarea matInput placeholder="0" maxlength="255" rows="4" [(ngModel)]="itemDescription" (ngModelChange)="descriptionChanged()"></textarea>
+            <mat-hint>12-17 characters per line recommended</mat-hint>
+        </mat-form-field> 
+    </div>
+</div>

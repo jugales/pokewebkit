@@ -23,10 +23,30 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
-        path: '',
-        loadChildren: () => import('./gba/home-gba/home-gba.module').then(m => m.HomeGbaModule), 
+        path: 'battlefields',
+        loadChildren: () => import('./gba/pages/battlefield/battlefield.module').then(m => m.BattlefieldModule), 
         pathMatch: 'full'
-      }
+      },
+      {
+        path: 'items',
+        loadChildren: () => import('./gba/pages/item/item.module').then(m => m.ItemModule), 
+        pathMatch: 'full'
+      },
+      {
+        path: 'monsters',
+        loadChildren: () => import('./gba/pages/monster/monster.module').then(m => m.MonsterModule), 
+        pathMatch: 'full'
+      },
+      {
+        path: 'trainers',
+        loadChildren: () => import('./gba/pages/trainer/trainer.module').then(m => m.TrainerModule), 
+        pathMatch: 'full'
+      },
+      {
+        path: 'world',
+        loadChildren: () => import('./gba/pages/world/world.module').then(m => m.WorldModule), 
+        pathMatch: 'full'
+      },
     ]
   },
   {

@@ -1,16 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; background-color: #f0f0f0; }
+html, body { height: 100%; background-color: #f7f5c7; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-@font-face {
-    font-family: 'P2';
-    src:  url('./assets/fonts/PressStart2P-Regular.ttf') format('truetype'),
-            url('./assets/fonts/PressStart2P-Regular.ttf') format('truetype');
-}
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .font-p2 {
-    font-family: 'P2', Arial, Helvetica, sans-serif !important;
+    font-family: 'Press Start 2P', Arial, Helvetica, sans-serif !important;
 }
 
 .bg-gray {
@@ -40,6 +36,58 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .poke-webkit-area {
     height: 100vh;
+}
+
+.poke-sprite-circle {
+    border-radius: 50%;
+    background-color: #eaf5ff;
+}
+
+.poke-sprite-small {
+    background-color: #f7f5c580;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+.poke-sprite-circle-big {
+    border-radius: 50%;
+    background-color: hsla(57, 100%, 96%, 0.5);
+    position: absolute;
+    height: 100%;
+    left: 0; 
+    right: 0; 
+    bottom: 0;
+    margin-left: auto; 
+    margin-right: auto; 
+}
+.poke-sprite-small:hover {
+    cursor: pointer;
+    border: 2px solid #349dff;
+}
+
+.poke-sprite-active {
+    cursor: pointer;
+    background-color: #eaf5ff;
+    border: 2px solid #349dff;
+    border-radius: 8px;
+}
+
+#editable-data {
+    height: 100%;
+    position: relative;    
+}
+
+.editable-background {
+    position: absolute;
+    image-rendering: pixelated;
+    opacity: 0.35;
+    width: auto;
+    height: 100%;
+    left: 0; 
+    right: 0; 
+    bottom: 0;
+    margin-left: auto; 
+    margin-right: auto; 
 }
 
 
@@ -106,6 +154,11 @@ img {
 
 .poke-border-sm {
     border-radius: 8px !important;
+}
+
+.poke-border-top-sm {
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
 }
 
 .noselect {
@@ -206,13 +259,18 @@ img {
 
     .poke-tool-sub-sidenav-1x, .poke-tool-sub-sidenav-2x, .poke-tool-sub-sidenav-3x {
         width: 146px; /* 128 width + 18 for scrollbar */
-        min-height: calc(100vh - 138px - 36px - 42px - 8px) !important;
-        max-height: calc(100vh - 138px - 36px - 42px - 8px) !important; /* viewport height - header height - footer height -  */
+        min-height: calc(100vh - 60px - 82px - 36px) !important;
+        max-height: calc(100vh - 60px - 82px - 36px) !important; /* viewport height - header height - footer height -  */
     }
 
     .poke-tool-card-inner, .poke-tool-sub-sidenav-1x  {
-        min-height: calc(100vh - 137px - 8px) !important;
-        max-height: calc(100vh - 137px - 8px) !important; /* viewport height - header height - footer height */
+        min-height: calc(100vh - 60px - 36px) !important;
+        max-height: calc(100vh - 60px - 36px) !important; /* viewport height - header height - footer height */
+    }
+
+    .poke-tool-card-inner-toolbar  {
+        min-height: calc(100vh - 60px - 82px) !important;
+        max-height: calc(100vh - 60px - 82px) !important; /* viewport height - header height - footer height */
     }
 }
 
@@ -230,3 +288,5 @@ img {
     direction: ltr !important;
     -webkit-font-smoothing: antialiased !important;
 }
+
+/* New stuff below (June 2022) */

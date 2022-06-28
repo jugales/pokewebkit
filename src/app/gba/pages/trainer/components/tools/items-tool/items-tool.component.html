@@ -1,0 +1,50 @@
+<div class="row">
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>Item 1</mat-label>
+            <mat-select [(ngModel)]="trainer.items[0]" (ngModelChange)="trainerChanged()">
+                <mat-option 
+                    *ngFor="let item of itemService.items; let i = index" 
+                    [value]="item.uid">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>Item 2</mat-label>
+            <mat-select [(ngModel)]="trainer.items[1]" (ngModelChange)="trainerChanged()">
+                <mat-option 
+                    *ngFor="let item of itemService.items; let i = index" 
+                    [value]="item.uid">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>Item 3</mat-label>
+            <mat-select [(ngModel)]="trainer.items[2]" (ngModelChange)="trainerChanged()">
+                <mat-option 
+                    *ngFor="let item of itemService.items; let i = index" 
+                    [value]="item.uid">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div class="col-6 mt-3">
+        <mat-form-field class="w-100" appearance="fill">
+            <mat-label>Item 4</mat-label>
+            <mat-select [(ngModel)]="trainer.items[3]" (ngModelChange)="trainerChanged()">
+                <mat-option 
+                    *ngFor="let item of itemService.items; let i = index" 
+                    [value]="item.uid">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+    </div>
+</div>

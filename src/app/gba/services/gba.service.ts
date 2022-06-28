@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { CharacterSetService } from './character-set.service';
-import { RomConstants } from './rom-constants';
+import { RomConstants } from '../structures/rom-constants';
 import { saveAs } from 'file-saver-es';
 
 @Injectable({

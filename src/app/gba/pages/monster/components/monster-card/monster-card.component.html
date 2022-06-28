@@ -1,0 +1,45 @@
+<mat-card class="mb-3">
+    <div class="d-inline-flex justify-content-center w-100">
+        <div class="poke-border-sm bg-gray p-3 mb-3" *ngIf="monster">
+            <h3 class="mb-0 font-p2">{{ monster.name }}</h3>
+        </div>
+    </div>
+    <div class="poke-sprite-circle d-inline-flex justify-content-center w-100 mb-3">
+        <img *ngIf="currentSprite" [src]="currentSprite" width="100%" height="auto" />
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-3">
+            <div 
+                class="poke-border-sm poke-sprite-small" [class.poke-sprite-active]="currentSprite === frontNormalSprite">
+                <img *ngIf="frontNormalSprite" 
+                    (click)="setCurrentSprite(frontNormalSprite)"
+                    [src]="frontNormalSprite" width="100%" height="auto" />
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="poke-border-sm poke-sprite-small" [class.poke-sprite-active]="currentSprite === frontShinySprite">
+                <img *ngIf="frontShinySprite" 
+                    (click)="setCurrentSprite(frontShinySprite)"
+                    [src]="frontShinySprite" width="100%" height="auto" />
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="poke-border-sm poke-sprite-small" [class.poke-sprite-active]="currentSprite === backNormalSprite">
+                <img *ngIf="backNormalSprite" 
+                    (click)="setCurrentSprite(backNormalSprite)"
+                    [src]="backNormalSprite" width="100%" height="auto" />
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="poke-border-sm poke-sprite-small" [class.poke-sprite-active]="currentSprite === backShinySprite">
+                <img *ngIf="backShinySprite" 
+                    (click)="setCurrentSprite(backShinySprite)"
+                    [src]="backShinySprite" width="100%" height="auto" />
+            </div>
+        </div>
+    </div>
+    <button mat-flat-button color="accent" class="w-100 mb-2" disabled>Change Name</button>
+    <button mat-flat-button color="accent" class="w-100 mb-2" disabled>Battle Sprites</button>
+    <button mat-flat-button color="accent" class="w-100" disabled>Editor Settings</button>
+</mat-card>

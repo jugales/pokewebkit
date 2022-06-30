@@ -41,7 +41,7 @@ export class RomLandingComponent implements OnInit {
     else if (extension === 'nds')
       this.ndsService.loadRom(fileData, startTime);
 
-    this.router.navigate([`/${extension}/monsters`]);
+    this.router.navigate([`/${extension}/world`]);
   }
 
 }

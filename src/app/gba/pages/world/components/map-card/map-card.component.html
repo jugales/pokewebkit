@@ -1,0 +1,23 @@
+<mat-card class="mb-3">
+    <div class="d-inline-flex justify-content-center w-100">
+        <div class="poke-border-sm bg-gray p-3 mb-3" *ngIf="map">
+            <h3 class="mb-0 font-p2">{{ map.label ? map.label : '??????????' }}</h3>
+        </div>
+    </div>
+    <div class="w-100 mb-3">
+        <div class="poke-sprite-circle d-inline-flex justify-content-center w-100">
+            <img *ngIf="battlefield.backgroundImage" [src]="battlefield.backgroundImage"class="w-100 poke-border-sm" />
+        </div>
+    </div>
+
+    <div class="bg-gray w-100 poke-border-sm px-3 py-2 d-flex flex-column mb-2">
+        <mat-checkbox [(ngModel)]="isShowingAnimations" (ngModelChange)="updateAnimationsEnabled()" class="mb-2">Animations (experimental)</mat-checkbox>
+        <mat-checkbox [(ngModel)]="isShowingOverworlds" (ngModelChange)="updateOverworldsEnabled()">Overworlds</mat-checkbox>
+    </div>
+
+    <button mat-flat-button color="accent" class="w-100 mb-2" disabled>Change Name</button>
+    <!-- <button mat-flat-button color="accent" class="w-100 mb-2" (click)="editBlocks()">Blocks</button> -->
+    <button mat-flat-button color="accent" class="w-100 mb-2" (click)="editDoors()">Doors</button>
+    <button mat-flat-button color="accent" class="w-100 mb-2" (click)="updateZoom(getNextZoomLevel())">Zoom: {{ zoom }}x</button>
+    <button mat-flat-button color="accent" class="w-100" disabled>Editor Settings</button>
+</mat-card>

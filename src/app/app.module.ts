@@ -16,6 +16,7 @@ import { SaveDialogGbaComponent } from './gba/components/save-dialog-gba/save-di
 import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 import { NdsComponent } from './nds/nds.component';
 import { SaveDialogNdsComponent } from './nds/save-dialog-nds/save-dialog-nds.component';
+import { GlobalService } from './services/global.service';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { SaveDialogNdsComponent } from './nds/save-dialog-nds/save-dialog-nds.co
   providers: [
     GbaService,
     CharacterSetService,
-    MonsterService
+    MonsterService,
+    GlobalService
   ],
   bootstrap: [AppComponent]
 })

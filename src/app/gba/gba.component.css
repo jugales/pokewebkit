@@ -1,5 +1,5 @@
 .poke-tagline {
-    font-size: 14px;
+    font-size: 10px;
     font-weight: 500;
 }
 
@@ -7,4 +7,30 @@
     font-size: 14px !important;
     line-height: 14px !important;
     font-weight: 600;
+}
+
+.tool-menu-item {
+    /* background-color: #f7f5c580; */
+    border: 2px solid #fff; 
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+.tool-menu-item:hover {
+    cursor: pointer;
+    border: 2px solid #349dff;
+}
+.tool-menu-item-active {
+    background-color: #eaf5ff;
+    border: 2px solid #349dff;
+}
+
+.tool-menu-item-image {
+    background-color: #f7f5c580;
+    border-radius: 50%;
+}
+
+::ng-deep.mat-menu-panel {
+    max-width: none !important;
 }

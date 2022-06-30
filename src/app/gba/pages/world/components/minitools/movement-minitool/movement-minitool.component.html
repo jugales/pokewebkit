@@ -1,0 +1,53 @@
+<div class="w-100">
+    <div class="w-100 d-inline-flex align-items-center py-2 pr-3">
+        <h3 class="mb-0 mr-4"><b>Painting</b></h3>
+        <div [style.width]="'32px'" [style.height]="(16 * 2) + 'px'" class="d-inline-flex">
+            <div 
+                [style.width]="'32px'"
+                [style.height]="'32px'"
+                class="d-flex justify-content-center align-items-center position-absolute meta-bg-{{ getMovement(currentMovementId).type }}">
+                {{ currentMovementId.toString(16).toUpperCase() }}
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-0">Allow Movement</h2>
+    <div class="mb-3">
+        <div *ngFor="let movement of movements" class="w-100 pr-3">
+            <div *ngIf="movement.type === 'allowed'"
+                class="w-100 d-inline-flex align-items-center justify-content-between meta-bg-{{ movement.type }} px-2 cursor-pointer"
+                [class.border-primary]="movement.id === currentMovementId" 
+                (click)="setMovement(movement)"
+                matRipple>
+                <h3 class="mb-0"><span class="hex-value">0x{{ movement.id.toString(16).toUpperCase() }}</span> - <b class="hex-value">{{ movement.layer }}</b></h3>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-0">Prevent Movement</h2>
+    <div class="mb-3">
+        <div *ngFor="let movement of movements" class="w-100 pr-3">
+            <div *ngIf="movement.type === 'restricted'"
+                class="w-100 d-inline-flex align-items-center justify-content-between meta-bg-{{ movement.type }} px-2 cursor-pointer"
+                [class.border-primary]="movement.id === currentMovementId" 
+                (click)="setMovement(movement)"
+                matRipple>
+                <h3 class="mb-0"><span class="hex-value">0x{{ movement.id.toString(16).toUpperCase() }}</span> - <b class="hex-value">{{ movement.layer }}</b></h3>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-0">Wildcard (varies)</h2>
+    <div class="mb-3">
+        <div *ngFor="let movement of movements" class="w-100 pr-3">
+            <div *ngIf="movement.type === 'wildcard'"
+                class="w-100 d-inline-flex align-items-center justify-content-between meta-bg-{{ movement.type }} px-2 cursor-pointer"
+                [class.border-primary]="movement.id === currentMovementId" 
+                (click)="setMovement(movement)"
+                matRipple>
+                <h3 class="mb-0"><span class="hex-value">0x{{ movement.id.toString(16).toUpperCase() }}</span> - <b class="hex-value">{{ movement.layer }}</b></h3>
+            </div>
+        </div>
+    </div>
+
+</div>

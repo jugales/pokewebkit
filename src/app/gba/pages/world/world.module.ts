@@ -10,15 +10,31 @@ import { ScriptEditorDialogComponent } from './dialogs/script-editor-dialog/scri
 import { FormsModule } from '@angular/forms';
 import { MaterialModule } from 'src/app/material.module';
 import { CodemirrorModule } from '@ctrl/ngx-codemirror';
+import { MapCardComponent } from './components/map-card/map-card.component';
+import { BlocksetMinitoolComponent } from './components/minitools/blockset-minitool/blockset-minitool.component';
+import { MapRendererComponent } from './components/map-renderer/map-renderer.component';
+import { MovementMinitoolComponent } from './components/minitools/movement-minitool/movement-minitool.component';
+import { EntityMinitoolComponent } from './components/minitools/entity-minitool/entity-minitool.component';
+import { EncounterMinitoolComponent } from './components/minitools/encounter-minitool/encounter-minitool.component';
+import { HeaderToolComponent } from './components/tools/header-tool/header-tool.component';
+import { LayoutToolComponent } from './components/tools/layout-tool/layout-tool.component';
 
 
 @NgModule({
   declarations: [
     WorldComponent,
+    MapCardComponent,
     BlockEditorDialogComponent,
     DoorEditorDialogComponent,
     FieldEditorDialogComponent,
-    ScriptEditorDialogComponent
+    ScriptEditorDialogComponent,
+    BlocksetMinitoolComponent,
+    MapRendererComponent,
+    MovementMinitoolComponent,
+    EntityMinitoolComponent,
+    EncounterMinitoolComponent,
+    HeaderToolComponent,
+    LayoutToolComponent
   ],
   imports: [
     CommonModule,

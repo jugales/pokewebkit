@@ -1,0 +1,125 @@
+<div class="w-100 p-3">
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <mat-form-field class="w-100" appearance="fill">
+                <mat-label>Name</mat-label>
+                <mat-select [(ngModel)]="currentMap.header.labelIndex" (ngModelChange)="metadataChanged()">
+                    <mat-option 
+                        *ngFor="let name of worldService.mapNames; let i = index" 
+                        [value]="i - gbaService.constants().MAP_NAME_OFFSET">
+                        {{ i }} - {{ name }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field> 
+        </div>
+        <div class="col-md-6">
+            <mat-form-field class="w-100" appearance="fill">
+                <mat-label>Music</mat-label>
+                <mat-select [(ngModel)]="currentMap.header.musicId" (ngModelChange)="metadataChanged()">
+                    <mat-option 
+                        *ngFor="let name of gbaService.constants().MUSIC_NAMES; let i = index"
+                        [value]="(i + gbaService.constants().MUSIC_MODIFIER)">
+                        {{ (i + gbaService.constants().MUSIC_MODIFIER) }} - {{ name | uppercase }}
+                    </mat-option>
+                    
+                </mat-select>
+            </mat-form-field> 
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <mat-form-field class="w-100" appearance="fill">
+                <mat-label>Visibility</mat-label>
+                <mat-select [(ngModel)]="currentMap.header.visibilityType" (ngModelChange)="metadataChanged()">
+                    <mat-option [value]="0">0 - Regular</mat-option>
+                    <mat-option [value]="1">1 - Dark, Flash Usable</mat-option>
+                    <mat-option [value]="2">2 - Dark, Flash Unusable</mat-option>
+                    <mat-option [value]="3">3 - ???</mat-option>
+                    <mat-option [value]="4">4 - ???</mat-option>
+                    <mat-option [value]="5">5 - ???</mat-option>
+                    <mat-option [value]="6">6 - ???</mat-option>
+                    <mat-option [value]="7">7 - ???</mat-option>
+                    <mat-option [value]="8">8 - ???</mat-option>
+                    <mat-option [value]="9">9 - ???</mat-option>
+                    <mat-option [value]="10">10 - ???</mat-option>
+                    <mat-option [value]="11">11 - ???</mat-option>
+                    <mat-option [value]="12">12 - ???</mat-option>
+                    <mat-option [value]="13">13 - ???</mat-option>
+                    <mat-option [value]="14">14 - ???</mat-option>
+                    <mat-option [value]="15">15 - ???</mat-option>
+                </mat-select>
+            </mat-form-field> 
+        </div>
+        <div class="col-md-6">
+            <mat-form-field class="w-100" appearance="fill">
+                <mat-label>Weather</mat-label>
+                <mat-select [(ngModel)]="currentMap.header.weatherType" (ngModelChange)="metadataChanged()">
+                    <mat-option [value]="0">0 - Inside a Building</mat-option>
+                    <mat-option [value]="1">1 - Sunny, Clouds in Water</mat-option>
+                    <mat-option [value]="2">2 - Normal</mat-option>
+                    <mat-option [value]="3">3 - Rainy</mat-option>
+                    <mat-option [value]="4">4 - Three Snow Flakes</mat-option>
+                    <mat-option [value]="5">5 - Thunderstorm</mat-option>
+                    <mat-option [value]="6">6 - Steady Mist</mat-option>
+                    <mat-option [value]="7">7 - Steady Snow</mat-option>
+                    <mat-option [value]="8">8 - Sandstorm</mat-option>
+                    <mat-option [value]="9">9 - Fading Mist</mat-option>
+                    <mat-option [value]="10">10 - Dense Mist</mat-option>
+                    <mat-option [value]="11">11 - Cloudy</mat-option>
+                    <mat-option [value]="12">12 - Underground Flash</mat-option>
+                    <mat-option [value]="13">13 - Heavy Thunderstorm</mat-option>
+                    <mat-option [value]="14">14 - Underwater Mist</mat-option>
+                    <mat-option [value]="15">15 - ???</mat-option>
+                </mat-select>
+            </mat-form-field> 
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <mat-form-field class="w-100" appearance="fill">
+                <mat-label>Map Type</mat-label>
+                <mat-select [(ngModel)]="currentMap.header.mapType" (ngModelChange)="metadataChanged()">
+                    <mat-option [value]="0">0 - ???</mat-option>
+                    <mat-option [value]="1">1 - Village</mat-option>
+                    <mat-option [value]="2">2 - City</mat-option>
+                    <mat-option [value]="3">3 - Route</mat-option>
+                    <mat-option [value]="4">4 - Underground</mat-option>
+                    <mat-option [value]="5">5 - Underwater</mat-option>
+                    <mat-option [value]="6">6 - ???</mat-option>
+                    <mat-option [value]="7">7 - ???</mat-option>
+                    <mat-option [value]="8">8 - Inside a Building</mat-option>
+                    <mat-option [value]="9">9 - Inside a Secret Base</mat-option>
+                    <mat-option [value]="10">10 - ???</mat-option>
+                    <mat-option [value]="11">11 - ???</mat-option>
+                    <mat-option [value]="12">12 - ???</mat-option>
+                    <mat-option [value]="13">13 - ???</mat-option>
+                    <mat-option [value]="14">14 - ???</mat-option>
+                    <mat-option [value]="15">15 - ???</mat-option>
+                </mat-select>
+            </mat-form-field> 
+        </div>
+        <div class="col-md-6">
+            <mat-form-field class="w-100" appearance="fill">
+                <mat-label>Battle Style</mat-label>
+                <mat-select [(ngModel)]="currentMap.header.battlefieldType" (ngModelChange)="metadataChanged()">
+                    <mat-option [value]="0">0 - Random</mat-option>
+                    <mat-option [value]="1">1 - Gym</mat-option>
+                    <mat-option [value]="2">2 - Evil Team</mat-option>
+                    <mat-option [value]="3">3 - ???</mat-option>
+                    <mat-option [value]="4">4 - Elite 4</mat-option>
+                    <mat-option [value]="5">5 - Elite 4</mat-option>
+                    <mat-option [value]="6">6 - Elite 4</mat-option>
+                    <mat-option [value]="7">7 - Elite 4</mat-option>
+                    <mat-option [value]="8">8 - Pokéball</mat-option>
+                    <mat-option [value]="9">9 - ???</mat-option>
+                    <mat-option [value]="10">10 - ???</mat-option>
+                    <mat-option [value]="11">11 - ???</mat-option>
+                    <mat-option [value]="12">12 - ???</mat-option>
+                    <mat-option [value]="13">13 - ???</mat-option>
+                    <mat-option [value]="14">14 - ???</mat-option>
+                    <mat-option [value]="15">15 - ???</mat-option>
+                </mat-select>
+            </mat-form-field> 
+        </div>
+    </div>
+</div>

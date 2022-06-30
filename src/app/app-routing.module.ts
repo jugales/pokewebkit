@@ -18,35 +18,63 @@ const routes: Routes = [
     ]
   },
   {
-    path: 'gba',
+    path: 'gba/battlefields',
     component: GbaComponent,
     canActivate: [AuthGuard],
     children: [
       {
-        path: 'battlefields',
+        path: '',
         loadChildren: () => import('./gba/pages/battlefield/battlefield.module').then(m => m.BattlefieldModule), 
         pathMatch: 'full'
-      },
+      }
+    ]
+  },
+  {
+    path: 'gba/items',
+    component: GbaComponent,
+    canActivate: [AuthGuard],
+    children: [
       {
-        path: 'items',
+        path: '',
         loadChildren: () => import('./gba/pages/item/item.module').then(m => m.ItemModule), 
         pathMatch: 'full'
-      },
+      }
+    ]
+  },
+  {
+    path: 'gba/monsters',
+    component: GbaComponent,
+    canActivate: [AuthGuard],
+    children: [
       {
-        path: 'monsters',
+        path: '',
         loadChildren: () => import('./gba/pages/monster/monster.module').then(m => m.MonsterModule), 
         pathMatch: 'full'
-      },
+      }
+    ]
+  },
+  {
+    path: 'gba/trainers',
+    component: GbaComponent,
+    canActivate: [AuthGuard],
+    children: [
       {
-        path: 'trainers',
+        path: '',
         loadChildren: () => import('./gba/pages/trainer/trainer.module').then(m => m.TrainerModule), 
         pathMatch: 'full'
-      },
+      }
+    ]
+  },
+  {
+    path: 'gba/world',
+    component: GbaComponent,
+    canActivate: [AuthGuard],
+    children: [
       {
-        path: 'world',
+        path: '',
         loadChildren: () => import('./gba/pages/world/world.module').then(m => m.WorldModule), 
         pathMatch: 'full'
-      },
+      }
     ]
   },
   {

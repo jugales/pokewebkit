@@ -87,6 +87,24 @@ export class OverworldService {
     let result = this.bitmapService.createBitmapCanvas(pixels, this.overworldPalettes[paletteId], overworld.width, overworld.height, true);
     return result;
   }
+
+  public getOverworldSpriteContextualized(index: number, frameId?: number, shouldFlip?: boolean) {
+    let spriteImage: HTMLCanvasElement = this.getOverworldSprite(index, frameId);
+    let spriteContext = spriteImage.getContext('2d');
+    if (shouldFlip && spriteImage.width <= 32) {
+      spriteContext.save();
+      spriteContext.translate(spriteImage.width, 0);
+      spriteContext.scale(-1, 1);
+      spriteContext.drawImage(spriteImage, 0, 0);
+      spriteContext.restore();
+    } else {
+      spriteContext.save();
+      spriteContext.drawImage(spriteImage, 0, 0);
+      spriteContext.restore();
+    }
+
+    return spriteImage;
+  }
 }
 export class PokeOverworldSprite {
 

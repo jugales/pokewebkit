@@ -90,7 +90,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     margin-right: auto; 
 }
 
-
+.poke-tool-menu mat-icon {
+    transition: all 0.25s linear;
+}
+.poke-tool-menu-open mat-icon {
+    transform: rotate(-45deg);
+}
 
 img {
     -webkit-font-smoothing: none;
@@ -205,6 +210,21 @@ img {
     font-family: 'Courier New', monospace;
 }
 
+.meta-bg-allowed {
+    background-color: rgba(0, 185, 40, 0.5);
+    border: 2px solid rgba(0, 185, 40, 0.5);
+}
+
+.meta-bg-restricted {
+    background-color: rgba(255, 50, 50, 0.5);
+    border: 2px solid rgba(255, 50, 50, 0.5);
+}
+
+.meta-bg-wildcard {
+    background-color: rgba(255, 145, 0, 0.5);
+    border: 2px solid rgba(255, 145, 0, 0.5);
+}
+
 /* script editor */
 
 /* min-height 300px too small, overriding */
@@ -259,18 +279,18 @@ img {
 
     .poke-tool-sub-sidenav-1x, .poke-tool-sub-sidenav-2x, .poke-tool-sub-sidenav-3x {
         width: 146px; /* 128 width + 18 for scrollbar */
-        min-height: calc(100vh - 60px - 82px - 36px) !important;
-        max-height: calc(100vh - 60px - 82px - 36px) !important; /* viewport height - header height - footer height -  */
+        /* min-height: calc(100vh - 64px - 82px - 36px) !important;
+        max-height: calc(100vh - 64px - 82px - 36px) !important; */
     }
 
     .poke-tool-card-inner, .poke-tool-sub-sidenav-1x  {
-        min-height: calc(100vh - 60px - 36px) !important;
-        max-height: calc(100vh - 60px - 36px) !important; /* viewport height - header height - footer height */
+        /* min-height: calc(100vh - 64px - 36px) !important;
+        max-height: calc(100vh - 64px - 36px) !important;  */
     }
 
     .poke-tool-card-inner-toolbar  {
-        min-height: calc(100vh - 60px - 82px) !important;
-        max-height: calc(100vh - 60px - 82px) !important; /* viewport height - header height - footer height */
+        /* min-height: calc(100vh - 64px - 82px) !important;
+         max-height: calc(100vh - 64px - 82px) !important;  */
     }
 }
 
@@ -290,3 +310,17 @@ img {
 }
 
 /* New stuff below (June 2022) */
+
+.pokewebkit-title {
+    border-top-left-radius: 32px;
+    border-bottom-left-radius: 32px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    background-color: #eaf5ff;
+    padding-right: 16px;
+}
+
+.mat-dialog-container {
+    margin-top: 64px !important;
+    z-index: 10000 !important;
+}

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { PokeBattlefield } from 'src/app/gba/services/battlefield/battlefield.service';
 
 @Component({

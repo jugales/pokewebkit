@@ -57,13 +57,9 @@ export class WorldComponent implements OnInit {
   public isShowingOverworlds: boolean = true;
   public isMouseDown: boolean = false;
 
-  public zoom: number = 1;
+  public zoom: number = 2;
 
   public animatedTileIndexes: number[][] = [];
-
-  public isDrawingMap: boolean = false;
-  public currentMapCanvas: HTMLCanvasElement;
-  public currentMapContext: CanvasRenderingContext2D;
 
   public isDrawingBlockset: boolean = false;
   public currentBlocksetCanvas: HTMLCanvasElement;
@@ -78,6 +74,9 @@ export class WorldComponent implements OnInit {
   public isAnimatingTiles: boolean = false;
   public isBlocksetRendered: boolean = false;
   public isBlockChanged: boolean = false;
+
+  public isMinitoolAvailable: boolean = false;
+  public isMinitoolPopupOpen: boolean = false;
 
   constructor(public gbaService: GbaService, public worldService: WorldService, 
     private changeDetector: ChangeDetectorRef, public bitmapService: BitmapService, 
@@ -96,21 +95,33 @@ export class WorldComponent implements OnInit {
     if (!this.itemService.items || this.itemService.items.length == 0)
       this.itemService.loadItems();
 
-    this.currentMapCanvas = document.createElement('canvas');
-    this.currentMapContext = this.currentMapCanvas.getContext('2d');
-
     this.currentBlocksetCanvas = document.createElement('canvas');
     this.currentBlocksetContext = this.currentBlocksetCanvas.getContext('2d');
 
     this.currentPaintBlockCanvas = document.createElement('canvas');
     this.currentPaintBlockContext = this.currentPaintBlockCanvas.getContext('2d');
     
+    if (this.viewportService.isMedium)
+      this.isMinitoolPopupOpen = true;
+
     if (this.gbaService.isLoaded()) 
       this.loadWorld();
   
     this.gbaService.romLoaded.subscribe(() => {
       this.loadWorld();
     });
+
+    this.dialog.afterOpened.subscribe(() => {
+      this.isMinitoolAvailable = false;
+      this.isMinitoolPopupOpen = false;
+    });
+    this.dialog.afterAllClosed.subscribe(() => {
+      this.onToolUpdated();
+    })
+  }
+
+  public toggleMinitoolPopup() {
+    this.isMinitoolPopupOpen = !this.isMinitoolPopupOpen;
   }
 
   public changeZoom() {
@@ -174,7 +185,6 @@ export class WorldComponent implements OnInit {
         let endTime = Date.now();
         console.log('Loaded tile cache in ' + ((endTime - startCacheTime) / 1000).toFixed(1) + ' seconds');
 
-        this.paintBlockSelected(1); // 0 on basically every blockset is empty
         this.worldService.getDoorset(0, this.currentMap.layout.primaryTileset.palettes);
 
         this.animatedTileIndexes = this.currentMap.blockset.getAnimatedTileIndexes(this.currentMap.blockset.primaryTileset.index, this.currentMap.blockset.secondaryTileset.index);
@@ -212,10 +222,6 @@ export class WorldComponent implements OnInit {
 
         this.grassOverlay = this.worldService.overlays[4];
         this.setCurrentEntity(0, 'NPC');
-
-        this.currentMapContext.clearRect(0, 0, this.currentMapCanvas.width, this.currentMapCanvas.height);
-        this.currentMapCanvas.width = this.currentMap.layout.mapWidth * 16;
-        this.currentMapCanvas.height = this.currentMap.layout.mapHeight * 16;
    
         this.currentBlocksetContext.clearRect(0, 0, this.currentBlocksetCanvas.width, this.currentBlocksetCanvas.height);
         this.currentBlocksetCanvas.width = 128;
@@ -228,33 +234,25 @@ export class WorldComponent implements OnInit {
         this.isBlockChanged = true;
         this.drawWorld();
       });
-
+      this.onToolUpdated();
+      
       let endTime = Date.now();
       console.log('Loaded map in ' + ((endTime - startTime) / 1000).toFixed(1) + ' seconds');
   }
 
-  public animateWorld() {
-    
-  }
-
   private async drawWorld() {
     this.worldRenderRef = requestAnimationFrame(this.drawWorld.bind(this));
-    this.zone.runOutsideAngular(() => { 
-      this.isDrawingMap = false;
-      this.drawBlockset();
+    this.zone.runOutsideAngular(() => {
       this.drawParties();
       this.drawPaintBlock();
-      this.drawMap(); // rendered last OR ELSE BAD THINGS (except tile animations)
-
-      if (this.isAnimatingTiles)
-        this.drawTileAnimations();
     }); 
   }
 
-  public setTileAnimationState() {
-    if (this.isAnimatingTiles) {
-      this.drawTileAnimations();
-    } else {
+  public setTileAnimationState(newValue?: boolean) {
+    if (newValue !== undefined)
+      this.isAnimatingTiles = newValue;
+
+    if (!this.isAnimatingTiles) {
       this.stopTileAnimations();
     }
   }
@@ -266,28 +264,6 @@ export class WorldComponent implements OnInit {
           let encounter = this.currentMap.encounterData.encounterTypeGroups[i].wildMonsters[j][x];
           encounter.spriteCanvas = this.monsterService.loadBattleSprite(encounter.monsterId, true, false);
         }
-      }
-    }
-  }
-
-  public drawTileAnimations() {
-    let loopTime: number = performance.now(); // helps sync tile animations
-
-    // Draw tile animations together to avoid desync issues
-    for (const [key, value] of this.currentMap.blockset.primaryTileset.tileCache.entries()) {
-      let tile: MapBlockTile = value;
-      if (tile.bitmap.bitmapFrames.length > 1) {
-        if (!tile.bitmap.isAnimating)
-          tile.bitmap.start(this.zone);
-        tile.bitmap.doAnimation(loopTime);
-      }
-    }
-    for (const [key, value] of this.currentMap.blockset.secondaryTileset.tileCache.entries()) {
-      let tile: MapBlockTile = value;
-      if (tile.bitmap.bitmapFrames.length > 1) {
-        if (!tile.bitmap.isAnimating)
-          tile.bitmap.start(this.zone);
-        tile.bitmap.doAnimation(loopTime);
       }
     }
   }
@@ -332,116 +308,12 @@ export class WorldComponent implements OnInit {
     }
   }
 
-  private TILE_SIZE: number = 16;
-
-  public drawBlockset() {
-    
-    for (let i = 0; i < 861; i++) {
-      let block: MapBlock = this.currentMap.blockset.getBlock(i, this.gbaService, this.bitmapService);
-      let blockX = i * this.TILE_SIZE % this.currentBlocksetCanvas.width;
-      let blockY = Math.floor((i * this.TILE_SIZE / this.currentBlocksetCanvas.width)) * this.TILE_SIZE;
-
-      if (this.worldService.isBlockAnimated(block) || !this.isBlocksetRendered || this.isBlockChanged)
-        this.worldService.drawBlock(this.currentBlocksetContext, block, blockX, blockY, this.isDrawingMap);
-    }
-    this.isBlocksetRendered = true;
-  }
-
-  public drawMap() {
-    // force redraw when last behavior animation finishes
-    for (let i = 0; i < this.currentOverlays.length; i++) {
-      if (this.currentOverlays[i].overlay.animations[i] && !this.currentOverlays[i].overlay.animations[i].isAnimating) {
-        this.isBlockChanged = true;
-      }
-    }
-    if (this.currentOverlays.length > 0)
-      this.currentOverlays = this.currentOverlays.filter(overlay => overlay.overlay.animations[0].isAnimating == true);
-    if (this.currentOverlays.length == 1 && !this.currentOverlays[0].overlay.animations[0].isAnimating) 
-      this.currentOverlays = [];
-    
-    
-    // bottom tile layer
-    for (let row = 0; row < this.currentMap.layout.mapHeight; row++) {
-      for (let col = 0; col < this.currentMap.layout.mapWidth; col++) {
-        let blockId: number = this.currentMap.blockData.blockIds[row * this.currentMap.layout.mapWidth + col];
-        let blockData: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
-        let blockX: number = col * this.TILE_SIZE;
-        let blockY: number = row * this.TILE_SIZE;
-
-        this.currentMapContext.clearRect(blockX, blockY, 16, 16);
-        this.worldService.drawBlock(this.currentMapContext, blockData, blockX, blockY, this.isDrawingMap, 0);
-          
-        for (let i = 0; i < this.currentOverlays.length; i++) {
-          if ((this.currentOverlays[i].overlay.index !== 4) 
-            && this.currentOverlays[i].x == col && this.currentOverlays[i].y == row
-            && this.currentOverlays[i].overlay && this.currentOverlays[i].overlay.animations.length > 0
-            && this.currentOverlays[i].overlay.animations[0].isAnimating) {
-              this.currentOverlays[i].overlay.animations[0].doAnimation();
-              this.currentMapContext.drawImage(this.currentOverlays[i].overlay.animations[0].currentFrame, blockX, blockY);
-          }
-        }
-      }
-    }
-
-    // object/player layer
-    if (this.isShowingOverworlds) {
-      for (let npcId = 0; npcId < this.currentMap.entityData.npcs.length; npcId++) {
-        let npc: MapNPCData = this.currentMap.entityData.npcs[npcId];
-        if (npc && npc.overworldSprite) {
-          let npcX: number = npc.xPosition * this.TILE_SIZE - (npc.overworldSprite.width >  16 ? (npc.overworldSprite.width / 4) : 0);
-          let npcY: number = npc.yPosition * this.TILE_SIZE - (npc.overworldSprite.height - this.TILE_SIZE);
-    
-          if (npc.overworldSprite && npc.xPosition < this.currentMap.layout.mapWidth && npc.yPosition < this.currentMap.layout.mapHeight) {
-            this.currentMapContext.drawImage(npc.overworldSprite, npcX, npcY);
-
-            if (!this.isOverlayExistsAt(npc.xPosition, npc.yPosition) && this.isGrassEncounterBlock(this.currentMap.blockData.blockIds[npc.yPosition * this.currentMap.layout.mapWidth + npc.xPosition]))
-              this.currentMapContext.drawImage(this.grassOverlay.animations[0].bitmapFrames[this.grassOverlay.animations[0].bitmapFrames.length - 1], npcX, npc.yPosition * this.TILE_SIZE);
-          }
-        }
-      }
-    }
-
-    // top tile layer
-    for (let row = 0; row < this.currentMap.layout.mapHeight; row++) {
-      for (let col = 0; col < this.currentMap.layout.mapWidth; col++) {
-        let blockId: number = this.currentMap.blockData.blockIds[row * this.currentMap.layout.mapWidth + col];
-        let blockData: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
-        let blockX: number = col * this.TILE_SIZE;
-        let blockY: number = row * this.TILE_SIZE;
-
-        this.worldService.drawBlock(this.currentMapContext, blockData, blockX, blockY, this.isDrawingMap, 1);
-
-        for (let i = 0; i < this.currentOverlays.length; i++) {
-          if (this.currentOverlays[i].overlay.index == 4) {
-            if (this.currentOverlays[i].overlay.animations[0].isAnimating
-              && (col == this.currentOverlays[i].x && row == this.currentOverlays[i].y)) {
-              this.currentOverlays[i].overlay.animations[0].doAnimation();
-              this.currentMapContext.drawImage(this.currentOverlays[i].overlay.animations[0].currentFrame, blockX, blockY);
-            }
-          }
-        }
-      }
-    }
-
-    this.isBlockChanged = false;
-    this.isDrawingMap = true;
-  }
-
   public setCurrentBank(bank: any, loadInitialMap?: boolean) {
     if (bank != this.currentBank)
       this.currentBank = bank;
 
     if (loadInitialMap)
       this.setCurrent(this.worldService.getMap(this.worldService.maps.indexOf(this.currentBank), 0));
-  }
-
-  public isOverlayExistsAt(x: number, y: number) {
-    for (let i = 0; i < this.currentOverlays.length; i++) {
-      if (this.currentOverlays[i].x == x && this.currentOverlays[i].y == y) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public blockEnter(blockData: MapBlockData, j, i) {
@@ -454,11 +326,14 @@ export class WorldComponent implements OnInit {
     this.currentPaintBlockId = i;
     this.currentPaintBlock = this.currentMap.blockset.getBlock(i, this.gbaService, this.bitmapService);
 
+    if (!this.viewportService.isMedium)
+      this.isMinitoolPopupOpen = false;
+
     this.drawPaintBlock();
   }
 
   public drawPaintBlock() {
-    this.worldService.drawBlock(this.currentPaintBlockContext, this.currentPaintBlock, 0, 0, this.isDrawingMap);
+    this.worldService.drawBlock(this.currentPaintBlockContext, this.currentPaintBlock, 0, 0, false);
   }
 
   public blockClicked(x: number, y: number) {
@@ -501,45 +376,7 @@ export class WorldComponent implements OnInit {
       }
     }
 
-    if (this.currentWorldTool == 'behavior' && this.isBehaviorBlock(this.currentMap.blockData.blockIds[blockMapId])) {
-      let block: MapBlock = this.currentMap.blockset.getBlock(this.currentMap.blockData.blockIds[blockMapId], this.gbaService, this.bitmapService);
-      
-      if (block.behaviorId == 2 || block.behaviorId == 22) {    
-        let copyOfOverlay: MapFieldOverlay = undefined;
-        if (block.behaviorId == 2)
-          copyOfOverlay = _.cloneDeep(this.grassOverlay);
-        else if (block.behaviorId == 22)
-          copyOfOverlay = _.cloneDeep(this.worldService.overlays[5]);
-
-        let overlayExists: boolean = false;
-        for (let i = 0; i < this.currentOverlays.length; i++) {
-          if (this.currentOverlays[i].overlay.index == copyOfOverlay.index && this.currentOverlays[i].x == x && this.currentOverlays[i].y == y) {
-            overlayExists = true;
-            break;
-          }
-        }
-
-        copyOfOverlay.animations[0].start();
-        this.currentOverlays.push({ overlay: copyOfOverlay, x: x, y: y });
-      }
-    }
-
     this.changeDetector.detectChanges();
-  }
-
-  public editScript() {
-    switch (this.currentEntityType) {
-      case 'NPC':
-        this.dialog.open(ScriptEditorDialogComponent, { data: { address: this.currentNPC.scriptAddress } });
-        break;
-      case 'SIGN':
-        this.dialog.open(ScriptEditorDialogComponent, { data: { address: this.currentSign.scriptAddress } });
-        break;
-      case 'SCRIPT':
-        this.dialog.open(ScriptEditorDialogComponent, { data: { address: this.currentScript.scriptAddress } });
-        break;
-    }
-    
   }
   
   public editBlocks() {
@@ -558,7 +395,16 @@ export class WorldComponent implements OnInit {
     return Math.floor(value);
   }
 
-  public setCurrentEntity(id: number, type: string) {
+  public onToolUpdated() {
+    if (this.currentWorldTool === 'tiles' || this.currentWorldTool === 'movement' || this.currentWorldTool === 'entities' || this.currentWorldTool === 'encounters')
+      this.isMinitoolAvailable = true;
+    else
+      this.isMinitoolAvailable = false;
+  }
+
+  public setCurrentEntity(id: any, type?: string) {
+    console.log(id);
+
     this.currentEntityType = type;
 
     switch (type) {
@@ -604,268 +450,7 @@ export class WorldComponent implements OnInit {
         break;
     }
   }
-
-  public setEntityForward() {
-    switch (this.currentEntityType) {
-      case 'NPC':
-        if (this.currentNPC.uid + 1 >= (this.currentMap.entityData.npcs.length))
-          return;
-        this.setCurrentEntity(this.currentNPC.uid + 1, 'NPC');
-        break;
-      case 'SIGN':
-        if (this.currentSign.uid + 1 >= (this.currentMap.entityData.signs.length))
-          return;
-        this.setCurrentEntity(this.currentSign.uid + 1, 'SIGN');
-        break;
-      case 'WARP':
-        if (this.currentWarp.uid + 1 >= (this.currentMap.entityData.warps.length))
-          return;
-        this.setCurrentEntity(this.currentWarp.uid + 1, 'WARP');
-        break;
-      case 'SCRIPT':
-        if (this.currentScript.uid + 1 >= (this.currentMap.entityData.scripts.length))
-        return;
-        this.setCurrentEntity(this.currentScript.uid + 1, 'SCRIPT');
-        break;
-    }
-  }
-
-  public setEntityBackward() {
-    switch (this.currentEntityType) {
-      case 'NPC':
-        if (this.currentNPC.uid - 1 < 0)
-          return;
-        this.setCurrentEntity(this.currentNPC.uid - 1, 'NPC');
-        break;
-      case 'SIGN':
-        if (this.currentSign.uid - 1 < 0)
-          return;
-        this.setCurrentEntity(this.currentSign.uid - 1, 'SIGN');
-        break;
-      case 'WARP':
-        if (this.currentWarp.uid - 1 < 0)
-          return;
-        this.setCurrentEntity(this.currentWarp.uid - 1, 'WARP');
-        break;
-      case 'SCRIPT':
-        if (this.currentScript.uid - 1 < 0)
-        return;
-        this.setCurrentEntity(this.currentScript.uid - 1, 'SCRIPT');
-        break;
-    }
-  }
-
-  public npcSpriteChanged() {
-    let directionFrame: number = 0;
-    let shouldFlip: boolean = false;
-    switch (this.currentNPC.movementType) {
-      case 7:
-        directionFrame = 1;
-        break;
-      case 8:
-      case 11:
-        directionFrame = 0;
-        break;
-      case 9:
-        directionFrame = 2;
-        break;
-      case 10:
-        directionFrame = 2;
-        shouldFlip = true;
-        break;
-    }
-
-    let spriteImage = this.overworldService.getOverworldSprite(this.currentNPC.spriteId & 0xFF, directionFrame);
-    let spriteCanvas: HTMLCanvasElement = document.createElement('canvas');
-    spriteCanvas.width = spriteImage.width;
-    spriteCanvas.height = spriteImage.height;
-    let spriteContext = spriteCanvas.getContext('2d');
-
-    if (shouldFlip && spriteImage.width <= 32) {
-      spriteContext.save();
-      spriteContext.translate(spriteCanvas.width, 0);
-      spriteContext.scale(-1, 1);
-      spriteContext.drawImage(spriteImage, 0, 0);
-      spriteContext.restore();
-    } else {
-      spriteContext.save();
-      spriteContext.drawImage(spriteImage, 0, 0);
-      spriteContext.restore();
-    }
-
-    this.currentNPC.overworldSprite = spriteCanvas;
-  }
-
-  public npcChanged() {
-    this.npcSpriteChanged();
-    
-    let pendingChange: PendingChange = new PendingChange();
-    pendingChange.key = this.currentNPC.address + '-changed';
-    pendingChange.changeReason = this.currentMap.label + ' NPC Data Changed';
-    pendingChange.address = this.currentNPC.address;
-    pendingChange.bytesBefore = this.currentNPC.data;
-
-    let writeBuffer = new ArrayBuffer(24);
-    let writeView = new DataView(writeBuffer);
-
-    // write bytes in little endian
-    writeView.setUint8(0, this.currentNPC.npcIndex);
-    writeView.setUint8(1, this.currentNPC.spriteId);
-    writeView.setUint8(2, pendingChange.bytesBefore[2]); // unknown
-    writeView.setUint8(3, pendingChange.bytesBefore[3]); // unknown
-    writeView.setUint16(4, this.currentNPC.xPosition, true);
-    writeView.setUint16(6, this.currentNPC.yPosition, true);
-    writeView.setUint8(8, pendingChange.bytesBefore[8]); // unknown
-    writeView.setUint8(9, this.currentNPC.movementType);
-    writeView.setUint8(10, this.currentNPC.movementParam);
-    writeView.setUint8(11, pendingChange.bytesBefore[11]); // unknown
-    writeView.setUint8(12, this.currentNPC.isTrainer ? 1 : 0);
-    writeView.setUint8(13, pendingChange.bytesBefore[13]); // unknown
-    writeView.setUint16(14, this.currentNPC.viewRadius, true);
-    writeView.setUint32(16, this.currentNPC.scriptAddress > 0 ? this.gbaService.toPointer(this.currentNPC.scriptAddress) : 0, true);
-    writeView.setUint16(20, this.currentNPC.personId, true);
-    writeView.setUint8(22, pendingChange.bytesBefore[22]); // unknown
-    writeView.setUint8(23, pendingChange.bytesBefore[23]); // unknown
-
-    pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.gbaService.queueChange(pendingChange);
-  }
-
-  public signChanged() {
-    let pendingChange: PendingChange = new PendingChange();
-    pendingChange.key = this.currentSign.address + '-changed';
-    pendingChange.changeReason = this.currentMap.label + ' Sign Data Changed';
-    pendingChange.address = this.currentSign.address;
-    pendingChange.bytesBefore = this.currentSign.data;
-
-    let writeBuffer = new ArrayBuffer(12);
-    let writeView = new DataView(writeBuffer);
-
-    // write bytes in little endian
-    writeView.setUint16(0, this.currentSign.xPosition, true);
-    writeView.setUint16(2, this.currentSign.yPosition, true);
-    writeView.setUint8(4, this.currentSign.movementLayer);
-    writeView.setUint8(5, this.currentSign.signType);
-    writeView.setUint8(6, pendingChange.bytesBefore[6]); // unknown
-    writeView.setUint8(7, pendingChange.bytesBefore[7]); // unknown
-    if (!(this.currentSign.signType == 5 || this.currentSign.signType == 6 || this.currentSign.signType == 7)) {
-      writeView.setUint32(8, this.gbaService.toPointer(this.currentSign.scriptAddress), true);
-    } else {
-      writeView.setUint16(8, this.currentSign.hiddenItemId, true);
-      writeView.setUint8(9, this.currentSign.globalHiddenIndex);
-      writeView.setUint8(10, this.currentSign.hiddenItemAmount);
-    }
-
-    pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.gbaService.queueChange(pendingChange);
-  }
-
-  public warpChanged() {
-    let pendingChange: PendingChange = new PendingChange();
-    pendingChange.key = this.currentWarp.address + '-changed';
-    pendingChange.changeReason = this.currentMap.label + ' Warp Data Changed';
-    pendingChange.address = this.currentWarp.address;
-    pendingChange.bytesBefore = this.currentWarp.data;
-
-    let writeBuffer = new ArrayBuffer(8);
-    let writeView = new DataView(writeBuffer);
-
-    // write bytes in little endian
-    writeView.setUint16(0, this.currentWarp.xPosition, true);
-    writeView.setUint16(2, this.currentWarp.yPosition, true);
-    writeView.setUint8(4, pendingChange.bytesBefore[4]); // unknown
-    writeView.setUint8(5, this.currentWarp.destinationWarp);
-    writeView.setUint8(6, this.currentWarp.destinationMap);
-    writeView.setUint8(7, this.currentWarp.destinationBank);
-
-    pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.gbaService.queueChange(pendingChange);
-  }
-
-  public scriptChanged() {
-    let pendingChange: PendingChange = new PendingChange();
-    pendingChange.key = this.currentScript.address + '-changed';
-    pendingChange.changeReason = this.currentMap.label + ' Script Data Changed';
-    pendingChange.address = this.currentScript.address;
-    pendingChange.bytesBefore = this.currentScript.data;
-
-    let writeBuffer = new ArrayBuffer(16);
-    let writeView = new DataView(writeBuffer);
-
-    // write bytes in little endian
-    writeView.setUint16(0, this.currentScript.xPosition, true);
-    writeView.setUint16(2, this.currentScript.yPosition, true);
-    writeView.setUint8(4, pendingChange.bytesBefore[4]); // unknown
-    writeView.setUint8(5, pendingChange.bytesBefore[5]); // unknown
-    writeView.setUint16(6, this.currentScript.varNumber, true);
-    writeView.setUint16(8, this.currentScript.varValue, true);
-    writeView.setUint8(10, pendingChange.bytesBefore[10]); // unknown
-    writeView.setUint8(11, pendingChange.bytesBefore[11]); // unknown
-    writeView.setUint32(12, this.gbaService.toPointer(this.currentScript.scriptAddress), true);
-
-    pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.gbaService.queueChange(pendingChange);
-  }
-
-  public encounterChanged(monster: WildMonsterData) {
-    let pendingChange: PendingChange = new PendingChange();
-    pendingChange.key = monster.address + '-changed';
-    pendingChange.changeReason = this.currentMap.label + ' Encounter Data Changed';
-    pendingChange.address = monster.address;
-    pendingChange.bytesBefore = monster.monsterData;
-
-    let writeBuffer = new ArrayBuffer(4);
-    let writeView = new DataView(writeBuffer);
-
-    // write bytes in little endian
-    writeView.setUint8(0, monster.minLevel);
-    writeView.setUint8(1, monster.maxLevel);
-    writeView.setUint16(2, monster.monsterId, true);
-
-    pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.gbaService.queueChange(pendingChange);
-  }
-
-  public metadataChanged() {
-    let pendingChange: PendingChange = new PendingChange();
-    pendingChange.key = this.currentMap.header.address + '-changed';
-    pendingChange.changeReason = this.currentMap.label + ' Header Changed';
-    pendingChange.address = this.currentMap.header.address;
-    pendingChange.bytesBefore = this.currentMap.header.data;
-
-    let writeBuffer = new ArrayBuffer(28);
-    let writeView = new DataView(writeBuffer);
-
-    // write bytes in little endian
-    writeView.setUint32(0, this.gbaService.toPointer(this.currentMap.header.mapDataAddress), true);
-    writeView.setUint32(4, this.gbaService.toPointer(this.currentMap.header.eventDataAddress), true);
-    writeView.setUint32(8, this.gbaService.toPointer(this.currentMap.header.mapScriptsAddress), true);
-    writeView.setUint32(12, this.gbaService.toPointer(this.currentMap.header.connectionsAddress), true);
-    writeView.setUint16(16, this.currentMap.header.musicId, true);
-    writeView.setUint16(18, this.currentMap.header.mapIndex, true);
-    writeView.setUint8(20, this.currentMap.header.labelIndex);
-    writeView.setUint8(21, this.currentMap.header.visibilityType);
-    writeView.setUint8(22, this.currentMap.header.weatherType);
-    writeView.setUint8(23, this.currentMap.header.mapType);
-    writeView.setUint8(24, pendingChange.bytesBefore[24]); // unknown
-    writeView.setUint8(25, pendingChange.bytesBefore[25]); // unknown
-    writeView.setUint8(26, this.currentMap.header.shouldShowLabelOnEntry);
-    writeView.setUint8(27, this.currentMap.header.battlefieldType);
-
-    pendingChange.bytesToWrite = new Uint8Array(writeBuffer);
-    this.gbaService.queueChange(pendingChange);
-  }
-
-  public isBehaviorBlock(blockId: number) {
-    let block: MapBlock = this.currentMap.blockset.getBlock(blockId, this.gbaService, this.bitmapService);
-    if (block.behaviorId == 2 || block.behaviorId == 209)  // grass animation
-      return true;
-    if (block.behaviorId == 22)  // ripple (puddle) animation
-      return true;
-    
-    return false;
-  }
-
+  
   public isEncounterBlock(blockId: number) {
     return this.isGrassEncounterBlock(blockId) || this.isSurfEncounterBlock(blockId);
   }
@@ -909,37 +494,37 @@ export class WorldComponent implements OnInit {
   }
 
   public movements: any[] = [
-    { id: 0x0, title: 'All Movement', color: '#0000ffb3', layer: 'Transition Layer' },
-    { id: 0x1, title: 'Obstacle', color: '#ff0000b3', layer: 'All Layers' },
-    { id: 0x4, title: 'Surf Only', color: '#ff00ffb3', layer: 'Layer 0' },
-    { id: 0x5, title: 'Obstacle', color: '#ffff00b3', layer: 'Layer 0' },
-    { id: 0x8, title: 'All Movement', color: '#808000b3', layer: 'Layer 1' },
-    { id: 0x9, title: 'Obstacle', color: '#008000b3', layer: 'Layer 1' },
-    { id: 0xC, title: 'All Movement', color: '#800080b3', layer: 'Layer 2 (default)' },
-    { id: 0xD, title: 'Obstacle', color: '#ff0080b3', layer: 'Layer 2 (default)' },
-    { id: 0x10, title: 'All Movement', color: '#4aa22db3', layer: 'Layer 3' },
-    { id: 0x11, title: 'Obstacle', color: '#1ae64db3', layer: 'Layer 3' },
-    { id: 0x14, title: 'All Movement', color: '#005300b3', layer: 'Layer 4' },
-    { id: 0x15, title: 'Obstacle', color: '#7da6bdb3', layer: 'Layer 4' },
-    { id: 0x18, title: 'All Movement', color: '#156a62b3', layer: 'Layer 5' },
-    { id: 0x19, title: 'Obstacle', color: '#ab2951b3', layer: 'Layer 5' },
-    { id: 0x1C, title: 'All Movement', color: '#7035bfb3', layer: 'Layer 6' },
-    { id: 0x1D, title: 'Obstacle', color: '#6175d6b3', layer: 'Layer 6' },
-    { id: 0x20, title: 'All Movement', color: '#ffff00b3', layer: 'Layer 7' },
-    { id: 0x21, title: 'Obstacle', color: '#658040b3', layer: 'Layer 7' },
-    { id: 0x24, title: 'All Movement', color: '#4e70f8b3', layer: 'Layer 8' },
-    { id: 0x25, title: 'Obstacle', color: '#3159a4b3', layer: 'Layer 8' },
-    { id: 0x28, title: 'All Movement', color: '#b4de21b3', layer: 'Layer 9' },
-    { id: 0x29, title: 'Obstacle', color: '#f54b50b3', layer: 'Layer 9' },
-    { id: 0x2C, title: 'All Movement', color: '#1eac68b3', layer: 'Layer 10' },
-    { id: 0x2D, title: 'Obstacle', color: '#be7641b3', layer: 'Layer 10' },
-    { id: 0x30, title: 'All Movement', color: '#14eba5b3', layer: 'Layer 11' },
-    { id: 0x31, title: 'Obstacle', color: '#804040b3', layer: 'Layer 11' },
-    { id: 0x34, title: 'All Movement', color: '#c8ab37b3', layer: 'Layer 12' },
-    { id: 0x35, title: 'Obstacle', color: '#3ec165b3', layer: 'Layer 12' },
-    { id: 0x38, title: 'All Movement', color: '#00ffffb3', layer: 'Layer 13' },
-    { id: 0x39, title: 'Obstacle', color: '#bc0ac0b3', layer: 'Layer 13' },
-    { id: 0x3C, title: 'Depends on Surrounding Blocks', color: '#5355acb3', layer: 'Layer Varies' }
+    { id: 0x0, title: 'All Movement', color: '#0000ffb3', layer: 'Transition', type: 'allowed' },
+    { id: 0x1, title: 'Obstacle', color: '#ff0000b3', layer: 'All Layers', type: 'restricted' },
+    { id: 0x4, title: 'Surf Only', color: '#ff00ffb3', layer: 'Surfing', type: 'allowed' },
+    { id: 0x5, title: 'Obstacle', color: '#ffff00b3', layer: 'Layer 0', type: 'restricted' },
+    { id: 0x8, title: 'All Movement', color: '#808000b3', layer: 'Layer 1', type: 'allowed' },
+    { id: 0x9, title: 'Obstacle', color: '#008000b3', layer: 'Layer 1', type: 'restricted' },
+    { id: 0xC, title: 'All Movement', color: '#800080b3', layer: 'Layer 2 (default)', type: 'allowed' },
+    { id: 0xD, title: 'Obstacle', color: '#ff0080b3', layer: 'Layer 2 (default)', type: 'restricted' },
+    { id: 0x10, title: 'All Movement', color: '#4aa22db3', layer: 'Layer 3', type: 'allowed' },
+    { id: 0x11, title: 'Obstacle', color: '#1ae64db3', layer: 'Layer 3', type: 'restricted' },
+    { id: 0x14, title: 'All Movement', color: '#005300b3', layer: 'Layer 4', type: 'allowed' },
+    { id: 0x15, title: 'Obstacle', color: '#7da6bdb3', layer: 'Layer 4', type: 'restricted' },
+    { id: 0x18, title: 'All Movement', color: '#156a62b3', layer: 'Layer 5', type: 'allowed' },
+    { id: 0x19, title: 'Obstacle', color: '#ab2951b3', layer: 'Layer 5', type: 'restricted' },
+    { id: 0x1C, title: 'All Movement', color: '#7035bfb3', layer: 'Layer 6', type: 'allowed' },
+    { id: 0x1D, title: 'Obstacle', color: '#6175d6b3', layer: 'Layer 6', type: 'restricted' },
+    { id: 0x20, title: 'All Movement', color: '#ffff00b3', layer: 'Layer 7', type: 'allowed' },
+    { id: 0x21, title: 'Obstacle', color: '#658040b3', layer: 'Layer 7', type: 'restricted' },
+    { id: 0x24, title: 'All Movement', color: '#4e70f8b3', layer: 'Layer 8', type: 'allowed' },
+    { id: 0x25, title: 'Obstacle', color: '#3159a4b3', layer: 'Layer 8', type: 'restricted' },
+    { id: 0x28, title: 'All Movement', color: '#b4de21b3', layer: 'Layer 9', type: 'allowed' },
+    { id: 0x29, title: 'Obstacle', color: '#f54b50b3', layer: 'Layer 9', type: 'restricted' },
+    { id: 0x2C, title: 'All Movement', color: '#1eac68b3', layer: 'Layer 10', type: 'allowed' },
+    { id: 0x2D, title: 'Obstacle', color: '#be7641b3', layer: 'Layer 10', type: 'restricted' },
+    { id: 0x30, title: 'All Movement', color: '#14eba5b3', layer: 'Layer 11', type: 'allowed' },
+    { id: 0x31, title: 'Obstacle', color: '#804040b3', layer: 'Layer 11', type: 'restricted' },
+    { id: 0x34, title: 'All Movement', color: '#c8ab37b3', layer: 'Layer 12', type: 'allowed' },
+    { id: 0x35, title: 'Obstacle', color: '#3ec165b3', layer: 'Layer 12', type: 'restricted' },
+    { id: 0x38, title: 'All Movement', color: '#00ffffb3', layer: 'Layer 13', type: 'allowed' },
+    { id: 0x39, title: 'Obstacle', color: '#bc0ac0b3', layer: 'Layer 13', type: 'restricted' },
+    { id: 0x3C, title: 'Depends on Surrounding Blocks', color: '#5355acb3', layer: 'Layer Varies', type: 'wildcard' }
   ];
 
   public movementTypes: string[] = ['No Movement', 'Look around', 'Walk around', 'Walk up and down', 'Walk up and down', 'Walk left and right', 'Walk left and right', 'Look up', 'Look down', 'Look left', 'Look right', 'Look down', 'Hidden', 'Look up and down', 'Look left and right', 'Look up and left', 'Look up and right', 'Look down and left', 'Look down and right', 'Look up, down and left', 'Look up, down and right', 'Look up, left and right', 'Look down, left and right', 'Look around counterclockwise', 'Look around clockwise', 'Run up and down', 'Run up and down', 'Run left and right', 'Run left and right', 'Run up, right, left and down', 'Run right, left, down and up', 'Run down, up, right and left', 'Run left, down, up and right', 'Run up, left, right and down', 'Run left, right, down and up', 'Run down, up, left and right', 'Run right, down, up and left', 'Run left, up, down and right', 'Run up, down, right and left', 'Run right, left, up and down', 'Run down, right, left and up', 'Run right, up, down and left', 'Run up, down, left and right', 'Run left, right, up and down', 'Run down, left, right and up', 'Run around counterclockwise', 'Run around counterclockwise', 'Run around counterclockwise', 'Run around counterclockwise', 'Run around counterclockwise', 'Run around clockwise', 'Run around clockwise', 'Run around clockwise', 'Copy Player', 'Mirror Player', 'Mirror Player', 'Mirror Player', 'Tree wall disguise', 'Rock wall disguise', 'Mirror player (standing)', 'Copy player (standing)', 'Mirror player (standing)', 'Mirror player (standing)', 'Hidden', 'Walk on the spot (Down)', 'Walk on the spot (Up)', 'Walk on the spot (Left)', 'Walk on the spot (Right)', 'Jog on the spot (Down)', 'Jog on the spot (Up)', 'Jog on the spot (Left)', 'Jog on the spot (Right)', 'Run on the spot (Down)', 'Run on the spot (Up)', 'Run on the spot (Left)', 'Run on the spot (Right)', 'Hidden', 'Walk on the spot (Down)', 'Walk on the spot (Up)', 'Walk on the spot (Left)', 'Walk on the spot (Right)'];

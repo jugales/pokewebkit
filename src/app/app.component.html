@@ -1,1 +1,6 @@
-<router-outlet></router-outlet>
+<div class="w-100 h-100 position-relative">
+    <div class="loading-overlay noselect" [style.display]="globalService.isAppLoading ? 'flex' : 'none'">
+        <img src="./assets/images/logo.png" height="128px" width="128px" alt="Spinning loading icon" />
+    </div>
+    <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,64 @@
+<div class="map-sidenav blockset-display">
+    <div class="w-100 d-inline-flex align-items-center py-2 pr-3">
+        <h3 class="mb-0 mr-4"><b>Painting</b></h3>
+        <div [style.width]="'32px'" [style.height]="(16 * 2) + 'px'" class="d-inline-flex">
+            <img 
+                *ngIf="currentPaintBlockCanvas.toDataURL()"
+                [src]="currentPaintBlockCanvas.toDataURL()" 
+                [style.width]="currentPaintBlockCanvas.width * 2 + 'px'"
+                [style.height]="currentPaintBlockCanvas.height * 2 + 'px'"
+                class="d-block position-absolute" 
+                [style.zIndex]="15" />
+        </div>
+    </div>
+
+    <div
+    class="map-sidenav blockset-display overflow-auto bg-white poke-tool-sub-sidenav-{{ zoom }}x poke-tool-card-inner-toolbar border-left">
+        <!-- <div class="position-relative">
+            <div class="position-absolute" [style.right]="(0 + (currentBlocksetCanvas.width * zoom)) + 'px'" [style.zIndex]="50">
+                <img 
+                *ngIf="currentBlocksetCanvas"
+                [src]="currentBlocksetCanvas.toDataURL()" 
+                [style.width]="(currentBlocksetCanvas.width * zoom) + 'px'"
+                [style.height]="(currentBlocksetCanvas.height * zoom) + 'px'"
+                class="d-block position-absolute" 
+                [style.zIndex]="15" />
+            </div>
+            <div class="position-absolute" [style.right]="(0 + (currentBlocksetCanvas.width * zoom)) + 'px'">
+                <div 
+                    *ngFor="let block of [].constructor(maxBlockCount); let i = index" 
+                    (click)="paintBlockSelected(i)"
+                    [style.left]="(i * 16 * zoom) % (16 * zoom * 8) + 'px'" 
+                    [style.top]="floorValue((i * 16 * zoom) / (16 * zoom * 8)) * 16 * zoom + 'px'" 
+                    [style.width]="(16 * zoom) + 'px'" 
+                    [style.height]="(16 * zoom) + 'px'"
+                    [style.zIndex]="250"
+                    class="position-absolute block-hover"
+                    [ngClass]="{ 'block-selected': (i == currentPaintBlockId) }"
+                    matRipple >
+                </div>
+            </div>
+        </div> -->
+        <div class="position-relative">
+            <img 
+            *ngIf="currentBlocksetCanvas"
+            [src]="currentBlocksetCanvas.toDataURL()" 
+            [style.width]="(currentBlocksetCanvas.width * zoom) + 'px'"
+            [style.height]="(currentBlocksetCanvas.height * zoom) + 'px'"
+            class="d-block" 
+            [style.zIndex]="15" />
+            <div 
+                *ngFor="let block of [].constructor(maxBlockCount); let i = index" 
+                (click)="paintBlockSelected(i)"
+                [style.left]="(i * 16 * zoom) % (16 * zoom * 8) + 'px'" 
+                [style.top]="floorValue((i * 16 * zoom) / (16 * zoom * 8)) * 16 * zoom + 'px'" 
+                [style.width]="(16 * zoom) + 'px'" 
+                [style.height]="(16 * zoom) + 'px'"
+                [style.zIndex]="250"
+                class="position-absolute block-hover"
+                [ngClass]="{ 'block-selected': (i == currentPaintBlockId) }"
+                matRipple >
+            </div>
+        </div>
+    </div>
+</div>

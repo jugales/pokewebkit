@@ -1,0 +1,52 @@
+<div class="w-100 p-3">
+    <mat-form-field class="w-100" appearance="fill">
+        <mat-label>Encounter Type</mat-label>
+        <mat-select [(ngModel)]="currentEncounterType">
+            <mat-option [value]="'GRASS'">Grass</mat-option>
+            <mat-option [value]="'SURF'">Surf</mat-option>
+            <mat-option [value]="'TREE'">Tree</mat-option>
+            <mat-option [value]="'FISHING'">Fishing</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <div *ngIf="!currentMap.encounterData.containsType(currentEncounterType)" class="w-100">
+        <p class="mb-3 text-gray">This map has no {{ currentEncounterType.toLowerCase() }} encounters. Adding new encounters will be available soon.</p>
+    </div>
+
+    <div *ngIf="currentMap.encounterData.containsType(currentEncounterType)" class="w-100">
+        <p class="mb-3 text-gray">You may edit existing encounters. Adding new encounters will be available soon.</p>
+        <div *ngFor="let tables of currentMap.encounterData.getTypeList(currentEncounterType).wildMonsters" class="w-100">
+            <div class="border poke-border-sm mb-3 pt-3 px-3" *ngFor="let encounter of tables; let i = index">
+                <div class="d-inline-flex w-100 align-items-center">
+                    <mat-form-field class="w-100" appearance="fill" >
+                        <mat-label>Monster {{ i + 1 }}</mat-label>
+                        <mat-select [(ngModel)]="encounter.monsterId" (ngModelChange)="updateEncounterSprites(); encounterChanged(encounter)">
+                            <mat-option 
+                                *ngFor="let monster of monsterService.monsters; let i = index" 
+                                [value]="i">
+                                {{ monster.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> 
+                    <img *ngIf="encounter.spriteCanvas" [src]="encounter.spriteCanvas" width="64px" height="64px" class="ml-3" />
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <mat-form-field class="w-100" appearance="fill">
+                            <mat-label>Min. Level</mat-label>
+                            <input type="number" min="0" max="100" matInput placeholder="0" [(ngModel)]="encounter.minLevel" (ngModelChange)="encounterChanged(encounter)">
+                            <mat-hint>0-100</mat-hint>
+                        </mat-form-field> 
+                    </div>
+                    <div class="col-6">
+                        <mat-form-field class="w-100" appearance="fill">
+                            <mat-label>Max. Level</mat-label>
+                            <input type="number" min="0" max="100" matInput placeholder="0" [(ngModel)]="encounter.maxLevel" (ngModelChange)="encounterChanged(encounter)">
+                            <mat-hint>0-100</mat-hint>
+                        </mat-form-field> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

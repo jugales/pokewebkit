@@ -1,0 +1,128 @@
+<div class="overflow-auto mw-100"
+    [style.minHeight]="currentMapCanvas.height * zoom + 'px'"
+    [style.minWidth]="currentMapCanvas.width * zoom + 'px'">
+
+    <div 
+        class="mw-100 overflow-auto position-relative" 
+        [style.minHeight]="currentMapCanvas.height * zoom + 'px'">
+        
+        <!-- Map render -->
+        <img 
+            *ngIf="currentMapCanvas"
+            [src]="currentMapCanvas.toDataURL()" 
+            [style.width]="currentMapCanvas.width * zoom + 'px'"
+            [style.height]="currentMapCanvas.height * zoom + 'px'"
+            class="d-block position-absolute" 
+            [style.zIndex]="15" />
+
+        <!-- Movement permission overlay -->
+        <div [style.zIndex]="500" class="position-absolute" *ngIf="currentWorldTool == 'movement'">
+            <div *ngFor="let row of [].constructor(currentMap.layout.mapHeight); let rowId = index" class="position-absolute">
+                <div *ngFor="let col of [].constructor(currentMap.layout.mapWidth); let colId = index" class="position-absolute">
+                    <div
+                        class="block-hover position-absolute d-flex align-items-center justify-content-center meta-bg-{{ getMovement(currentMap.blockData.blockMetas[rowId * currentMap.layout.mapWidth + colId]).type }}"
+                        [style.width]="16 * zoom + 'px'"
+                        [style.height]="16 * zoom + 'px'"
+                        [style.top]="rowId * 16 * zoom + 'px'"
+                        [style.left]="colId * 16 * zoom + 'px'">
+                        <span [style.fontWeight]="'500'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">{{ currentMap.blockData.blockMetas[rowId * currentMap.layout.mapWidth + colId].toString(16).toUpperCase() }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entities overlay -->
+        <div [style.zIndex]="550" class="position-absolute" *ngIf="currentWorldTool == 'entities'">
+            <div *ngFor="let npc of currentMap.entityData.npcs; let i = index">
+                <div
+                    class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                    [style.backgroundColor]="!isShowingOverworlds ? '#ffa825ce' : ''"
+                    [style.width]="16 * zoom + 'px'"
+                    [style.height]="16 * zoom + 'px'"
+                    [style.top]="npc.yPosition * 16 * zoom + 'px'"
+                    [style.left]="npc.xPosition * 16 * zoom + 'px'"
+                    [ngClass]="npc == currentNPC && currentEntityType == 'NPC' ? 'block-selected' : ''"
+                    (click)="setCurrentEntity(i, 'NPC')">
+                    <span *ngIf="!isShowingOverworlds" [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">P</span>
+                </div>
+            </div>
+
+            <div *ngFor="let sign of currentMap.entityData.signs; let i = index">
+                <div
+                    class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                    [style.backgroundColor]="'#0fa500b3'"
+                    [style.width]="16 * zoom + 'px'"
+                    [style.height]="16 * zoom + 'px'"
+                    [style.top]="sign.yPosition * 16 * zoom + 'px'"
+                    [style.left]="sign.xPosition * 16 * zoom + 'px'"
+                    [ngClass]="sign == currentSign && currentEntityType == 'SIGN' ? 'block-selected' : ''"
+                    (click)="setCurrentEntity(i, 'SIGN')">
+                    <span [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">SI</span>
+                </div>
+            </div>
+
+            <div *ngFor="let warp of currentMap.entityData.warps; let i = index">
+                <div
+                    class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                    [style.backgroundColor]="'#5900ff70'"
+                    [style.width]="16 * zoom + 'px'"
+                    [style.height]="16 * zoom + 'px'"
+                    [style.top]="warp.yPosition * 16 * zoom + 'px'"
+                    [style.left]="warp.xPosition * 16 * zoom + 'px'"
+                    [ngClass]="warp == currentWarp && currentEntityType == 'WARP' ? 'block-selected' : ''"
+                    (click)="setCurrentEntity(i, 'WARP')">
+                    <span [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">W</span>
+                </div>
+            </div>
+
+            <div *ngFor="let script of currentMap.entityData.scripts; let i = index">
+                <div
+                    class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                    [style.backgroundColor]="'#ff25c896'"
+                    [style.width]="16 * zoom + 'px'"
+                    [style.height]="16 * zoom + 'px'"
+                    [style.top]="script.yPosition * 16 * zoom + 'px'"
+                    [style.left]="script.xPosition * 16 * zoom + 'px'"
+                    [ngClass]="script == currentScript && currentEntityType == 'SCRIPT' ? 'block-selected' : ''"
+                    (click)="setCurrentEntity(i, 'SCRIPT')">
+                    <span [style.fontWeight]="'550'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'">S</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Encounters overlay -->
+        <div [style.zIndex]="500" class="position-absolute" *ngIf="currentWorldTool == 'encounters'">
+            <div *ngFor="let row of [].constructor(currentMap.layout.mapHeight); let rowId = index" class="position-absolute">
+                <div *ngFor="let col of [].constructor(currentMap.layout.mapWidth); let colId = index" class="position-absolute">
+                    <div
+                        class="block-hover position-absolute d-flex align-items-center justify-content-center"
+                        [style.backgroundColor]="!isEncounterBlock(currentMap.blockData.blockIds[rowId * currentMap.layout.mapWidth + colId]) ? 'rgba(0, 0, 0, 0.6)' : ''"
+                        [style.width]="16 * zoom + 'px'"
+                        [style.height]="16 * zoom + 'px'"
+                        [style.top]="rowId * 16 * zoom + 'px'"
+                        [style.left]="colId * 16 * zoom + 'px'">
+                        <span [style.fontWeight]="'500'" [style.fontSize]="12 + ((zoom - 1) * 8) + 'px'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid overlay -->
+        <div [style.zIndex]="500" class="position-absolute">
+            <div *ngFor="let row of [].constructor(currentMap.layout.mapHeight); let rowId = index" class="position-absolute">
+                <div *ngFor="let col of [].constructor(currentMap.layout.mapWidth); let colId = index" class="position-absolute">
+                    <div
+                        class="block-hover position-absolute"
+                        [style.width]="16 * zoom + 'px'"
+                        [style.height]="16 * zoom + 'px'"
+                        [style.top]="rowId * 16 * zoom + 'px'"
+                        [style.left]="colId * 16 * zoom + 'px'"
+                        (mouseover)="mouseOverBlock(colId, rowId)"
+                        (mousedown)="clickBlock(colId, rowId)"
+                        (mouseup)="isMouseDown = false">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

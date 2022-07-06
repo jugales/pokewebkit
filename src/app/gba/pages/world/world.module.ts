@@ -9,7 +9,6 @@ import { FieldEditorDialogComponent } from './dialogs/field-editor-dialog/field-
 import { ScriptEditorDialogComponent } from './dialogs/script-editor-dialog/script-editor-dialog.component';
 import { FormsModule } from '@angular/forms';
 import { MaterialModule } from 'src/app/material.module';
-import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 import { MapCardComponent } from './components/map-card/map-card.component';
 import { BlocksetMinitoolComponent } from './components/minitools/blockset-minitool/blockset-minitool.component';
 import { MapRendererComponent } from './components/map-renderer/map-renderer.component';
@@ -40,7 +39,6 @@ import { LayoutToolComponent } from './components/tools/layout-tool/layout-tool.
     CommonModule,
     MaterialModule,
     FormsModule,
-    CodemirrorModule,
     WorldRoutingModule
   ]
 })

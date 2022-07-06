@@ -29,8 +29,6 @@
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/codemirror/lib/codemirror.css",
-              "node_modules/codemirror/theme/material.css",
               "src/styles.css",
               "src/mat-styles.css"
             ],
@@ -46,10 +44,18 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                  },
+                "fonts": true
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
+              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -98,9 +104,7 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/mat-styles.css",
-              "node_modules/codemirror/lib/codemirror.css",
-              "node_modules/codemirror/theme/material.css"
+              "src/mat-styles.css"
             ],
             "scripts": [
               "node_modules/pixi.js/dist/browser/pixi.min.js"
